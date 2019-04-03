@@ -11,18 +11,30 @@ arq1=open(str(title),'r')
 
 arq2=open("output/"+str(title)+"2.c",'w')
 
+
+func = []
 texto = []
 contador = 0;
+it = iter(arq1);
 for linha in arq1:
     linha=linha.rstrip()
-    if "#pragma omp parallel" in linha:
-        arq2.write("CLUSTER_Start(0, CORE_NUMBER)\n");
-        arq2.write("");
-        contador = contador+1
-        #continue
+    it = iter(arq1);
+    if(re.search("#pragma omp parallel",linha)):
+            if re.search("{",) == False:
+                func.append(linha);
+            else:
+                while(re.search
+                break;
+            else:
+                while re.search("}",l1)==False:
+                    print("lululululul\n")
     else:
-        arq2.write(linha+'\n')
-print(texto)
+        texto.append(linha);
+                
+
+#print(texto)
+print("\n")
+print(func)
 print(contador)
 arq2.writelines(texto)
 arq1.close()
