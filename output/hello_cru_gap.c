@@ -7,10 +7,13 @@
 #include <time.h>
 #define CORE_NUMBER   (8)
 #include <stdio.h>
-#include <omp.h>
 #include "omp_gap8.h"
-generic_function0(void*){
+void generic_function0(void* gen_var0){
    printf("Hello fom core %d",omp_get_thread_num());
+}
+void caller(void* arg){
+int x = (int)arg;
+if(x ==0)return generic_function0(0);
 }
 
 
@@ -20,6 +23,9 @@ void Master_Entry(void *arg) {
 
 int main()
 {
+CLUSTER_Start(0, CORE_NUMBER);
+CLUSTER_SendTask(0, Master_Entry, (void *) NULL, 0);
+CLUSTER_Wait(0);
 
 return 0;
 }
