@@ -12,21 +12,22 @@ arq1=open(str(title),'r')
 title2 = title.split(".c")[0]
 arq2=open("output/"+str(title2)+"_gap.c",'w')
 
-arq2.write("#include "+"\"cmsis.h\"")
-arq2.write("#include "+ "\"gap_common.h\"")
-arq2.write("#include "+"\"mbed_wait_api.h\"")
+arq2.write("#include "+"\"cmsis.h\"\n")
+arq2.write("#include "+ "\"gap_common.h\"\n")
+arq2.write("#include "+"\"mbed_wait_api.h\"\n")
 
-arq2.write("// FEATURE_CLUSTER")
-arq2.write("#include "+"\"gap_cluster.h\"")
-arq2.write("#include "+"\"gap_dmamchan.h\"")
-arq2.write("#include "+"<time.h>")
+arq2.write("// FEATURE_CLUSTER\n")
+arq2.write("#include "+"\"gap_cluster.h\"\n")
+arq2.write("#include "+"\"gap_dmamchan.h\"\n")
+arq2.write("#include "+"<time.h>\n")
+
+arq2.write("#define CORE_NUMBER   (8)\n")
 
 
 
-
-flagchave =0
-flagchave2 =0
-flagomp =0
+flagchave = 0
+flagchave2 = 0
+flagomp = 0
 func = []
 functions=[]
 texto = []
@@ -34,9 +35,9 @@ contador = 0
 it = iter(arq1)
 for linha in arq1:
     linha=linha.rstrip()
-    if "stdio" in linha:
+    if "<stdio>" in linha:
         continue
-    if "omp.h" in linha:
+    if "#include omp.h" in linha:
         continue
     if re.search("pragma omp parallel",linha): #é regiao paralela?
         flagomp = 1
@@ -60,14 +61,29 @@ for linha in arq1:
                     functions.append(func)
                     func = []
         else:#so a prox linha e paralela
-                func.append(linha)
+                func.append("   "+linha)
                 flagomp = 0
                 functions.append(func)
                 func =[]
                 contador = contador +1
     else:#nao e regiao paralela
          texto.append(linha)
+#lets define the generic functions to be called
+for cont2 in range (contador):
+    arq2.write("generic_function"+str(cont2)+"(void*){\n")
+    arq2.writelines(functions[cont2])
+    arq2.write("\n}\n")
+    print(functions[cont2])
+    print("\n sou uma piada pra você?\n")
+arq2.write("\n\n")
 
+
+
+
+
+for linha in texto:
+    linha = linha.rstrip()
+    arq2.write(linha+"\n")
 #arq2.write(
 print(texto)
 print("\n")
