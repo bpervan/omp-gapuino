@@ -9,7 +9,21 @@ title=sys.argv[1]
 
 arq1=open(str(title),'r')
 
-arq2=open("output/"+str(title)+"2.c",'w')
+title2 = title.split(".c")[0]
+arq2=open("output/"+str(title2)+"_gap.c",'w')
+
+arq2.write("#include "+"\"cmsis.h\"")
+arq2.write("#include "+ "\"gap_common.h\"")
+arq2.write("#include "+"\"mbed_wait_api.h\"")
+
+arq2.write("// FEATURE_CLUSTER")
+arq2.write("#include "+"\"gap_cluster.h\"")
+arq2.write("#include "+"\"gap_dmamchan.h\"")
+arq2.write("#include "+"<time.h>")
+
+
+
+
 flagchave =0
 flagchave2 =0
 flagomp =0
@@ -20,10 +34,13 @@ contador = 0
 it = iter(arq1)
 for linha in arq1:
     linha=linha.rstrip()
-
+    if "stdio" in linha:
+        continue
+    if "omp.h" in linha:
+        continue
     if re.search("pragma omp parallel",linha): #é regiao paralela?
         flagomp = 1
-        print("o que que ta acontecendo aqui?\n")
+#        print("o que que ta acontecendo aqui?\n")
     elif flagomp: #to dentro de um pragma?
         if (re.search("{",linha)):
                 flagchave=1
@@ -40,18 +57,25 @@ for linha in arq1:
                     func.append(linha)
                     flagomp = 0
                     contador = contador + 1
+                    functions.append(func)
+                    func = []
         else:#so a prox linha e paralela
                 func.append(linha)
                 flagomp = 0
+                functions.append(func)
+                func =[]
+                contador = contador +1
     else:#nao e regiao paralela
          texto.append(linha)
+
+#arq2.write(
 print(texto)
 print("\n")
 print(func)
 print(contador)
 print("\n")
 print(functions)
-arq2.writelines(texto)
+#arq2.writelines(texto)
 arq1.close()
 arq2.close()
 
