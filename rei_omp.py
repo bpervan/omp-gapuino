@@ -33,11 +33,15 @@ functions=[]
 texto = []
 contador = 0
 it = iter(arq1)
+library =[]
 for linha in arq1:
     linha=linha.rstrip()
     if "<stdio>" in linha:
         continue
     if "#include omp.h" in linha:
+        continue
+    elif re.search("include",linha) or re.search("define",linha):
+        library.append(linha)
         continue
     if re.search("pragma omp parallel",linha): #é regiao paralela?
         flagomp = 1
@@ -69,6 +73,10 @@ for linha in arq1:
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
+
+
+for linha in library:
+    arq2.write(linha+"\n")
 for cont2 in range (contador):
     arq2.write("generic_function"+str(cont2)+"(void*){\n")
     arq2.writelines(functions[cont2])
@@ -76,7 +84,9 @@ for cont2 in range (contador):
     print(functions[cont2])
     print("\n sou uma piada pra você?\n")
 arq2.write("\n\n")
-
+arq2.write("void Master_Entry(void *arg) {\n")
+arq2.write("    CLUSTER_CoresFork(caller, arg);\n")
+arq2.write("}\n")
 
 
 
@@ -92,6 +102,7 @@ print(contador)
 print("\n")
 print(functions)
 #arq2.writelines(texto)
+print(library)
 arq1.close()
 arq2.close()
 
