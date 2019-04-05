@@ -32,6 +32,7 @@ func = []
 functions=[]
 texto = []
 contador = 0
+
 it = iter(arq1)
 library =[]
 for linha in arq1:
@@ -94,59 +95,54 @@ arq2.write("    CLUSTER_CoresFork(caller, arg);\n")
 arq2.write("}\n")
 
 
-
+cont_paral =contador
 flag_main=0
 flagchave=0
 flagchave2=0
 for linha in texto:
-    linha = linha.rstrip()
-    if re.search("main",linha):
-        flag_main = 1
-    elif flag_main ==1 and linha == "{":
-        flag_main = 2
-    elif flag_main == 1:
-        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *) NULL, 0);\n")
-        arq2.write("CLUSTER_Wait(0);\n")
-        if (re.search("{",linha)):
-                flagchave=1
-        if flagchave: #tem chaves na regiao?
-                if (re.search("{", linha)): #tem chaves internas?
-                    flagchave2=1
-                    func.append(linha)
-                elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
-                        func.append(linha)
-                        flagchave2 = 0
-                elif flagchave2:#ainda estou na chave interna
-                        func.append(linha)
-                elif re.search("}",linha):#a regiao paralela fechou?
-                    arq2.write("CLUSTER_Stop(0);\n")
-                    arq2.write("exit(0);\n")
-                    flag_main=0
-    elif flag_main ==2:
-        if re.search("return",linha):
-            arq2.write("exit(0)\n}\n")
-        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *) NULL, 0);\n")
-        arq2.write("CLUSTER_Wait(0);\n")
-        if (re.search("{",linha)):
-                flagchave=1
-        if flagchave: #tem chaves na regiao?
-                if (re.search("{", linha)): #tem chaves internas?
-                    flagchave2=1
-                    func.append(linha)
-                elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
-                        func.append(linha)
-                        flagchave2 = 0
-                elif flagchave2:#ainda estou na chave interna
-                        func.append(linha)
-                elif re.search("}",linha):#a regiao paralela fechou?
-                    arq2.write("CLUSTER_Stop(0);\n")
-                    arq2.write("exit(0);\n")
-                    
-                    flag_main = 0
-    arq2.write(linha+"\n")
-#arq2.write(
+    if re.search("main",linha) and re.search("{",linha):
+        flag_main = 1# chave ao lado da main
+        arq.write(linha)
+        flag_main = 3
+        continue
+    elif re.search("main",linha):
+        flag_main = 2#chave abaixo da main
+        arq2.write(linha+"\n")
+        continue
+    elif flag_main ==2 and re.search("{",linha):
+         flag_main = 3
+         arq2.write(linha+"\n")
+         continue
+    elif flag_main == 3:
+         flag_main = 4
+         arq2.write("int gen_vec["+str(contador)+"];\n")
+         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
+         arq2.write("int *L1_mem = L1_Malloc(8);\n")
+         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)gen_vec["+str(contador- cont_paral)+"], 0);\n")
+         cont_paral = cont_paral - 1
+
+         arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
+         arq2.write("CLUSTER_Wait(0);\n")
+         continue
+    if flag_main == 4:
+         #print("sera q ta entrando aqui?")
+         if (re.search("{", linha)): #tem chaves internas?
+            flagchave2=1
+            arq2.write(linha)
+         elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
+            arq2.write(linha)
+            flagchave2 = 0
+         elif flagchave2 == 1:#ainda estou na chave interna
+            arq2.write(linha)
+         elif re.search("}",linha):#fim da main
+            print("votz chegou aqui e agora?\n")
+            flag_main=0
+            arq2.write("exit(0);\n}\n")
+            print("exit(0);\n}\n)") 
+    else:
+         arq2.write(linha)# escreva as demais funções abaixo da main, todas as paralelas estao abaixo
+# o fim do arquivo chegou
+   #arq2.write(
 print(texto)
 #print("\n")
 #print(func)

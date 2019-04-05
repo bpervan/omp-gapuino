@@ -5,7 +5,7 @@
 int main()
 {
 #pragma omp parallel
-printf("Hello fom core %d",omp_get_thread_num());
+printf("Hello fom core %d\n",omp_get_thread_num());
 
 return 0;
 }
