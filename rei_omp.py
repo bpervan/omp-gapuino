@@ -5,7 +5,7 @@
 import sys
 import re
 title=sys.argv[1]
-
+#teste
 
 arq1=open(str(title),'r')
 
