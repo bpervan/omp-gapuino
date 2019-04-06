@@ -44,8 +44,11 @@ for linha in arq1:
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
         continue
-    if re.search("pragma omp parallel",linha): #é regiao paralela?
+    if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha): #é regiao paralela?
         flagomp = 1
+        texto.append("\nparallel_function"+str(contador)+"(0)\n")
+#       print("entrei aqui")
+        continue
 #        print("o que que ta acontecendo aqui?\n")
     elif flagomp: #to dentro de um pragma?
         if (re.search("{",linha)):
@@ -100,6 +103,17 @@ flag_main=0
 flagchave=0
 flagchave2=0
 for linha in texto:
+    if re.search("parallel",linha):
+        print("mayara eu te amo\n")
+        #arq2.write("generic_function"+str(contador - cont_paral)+"\n")
+        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
+        arq2.write("int *L1_mem = L1_Malloc(8);\n")
+        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
+        cont_paral = cont_paral - 1
+
+        arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
+        arq2.write("CLUSTER_Wait(0);\n")
+        arq2.write("CLUSTER_Stop(0);\n")
     if re.search("main",linha) and re.search("{",linha):
         flag_main = 1# chave ao lado da main
         arq.write(linha)
@@ -113,18 +127,10 @@ for linha in texto:
          flag_main = 3
          arq2.write(linha+"\n")
          continue
-    elif flag_main == 3:
-         flag_main = 4
-         arq2.write("int gen_vec["+str(contador)+"];\n")
-         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-         arq2.write("int *L1_mem = L1_Malloc(8);\n")
-         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)gen_vec["+str(contador- cont_paral)+"], 0);\n")
-         cont_paral = cont_paral - 1
-
-         arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
-         arq2.write("CLUSTER_Wait(0);\n")
-         continue
-    if flag_main == 4:
+  #  elif flag_main == 3:
+  #       flag_main = 4
+  #       continue
+    if flag_main == 3:
          #print("sera q ta entrando aqui?")
          if (re.search("{", linha)): #tem chaves internas?
             flagchave2=1

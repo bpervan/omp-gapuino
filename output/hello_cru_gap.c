@@ -22,11 +22,12 @@ void Master_Entry(void *arg) {
 }
 int main()
 {
-int gen_vec[1];
 CLUSTER_Start(0, CORE_NUMBER);
 int *L1_mem = L1_Malloc(8);
-CLUSTER_SendTask(0, Master_Entry, (void *)gen_vec[0], 0);
+CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 printf("Waiting...\n");
 CLUSTER_Wait(0);
+CLUSTER_Stop(0);
 exit(0);
 }
+//teste dps da main
