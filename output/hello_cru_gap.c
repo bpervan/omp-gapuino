@@ -9,13 +9,15 @@
 #include <stdio.h>
 #include "omp_gap8.h"
 void generic_function0(void* gen_var0){
-printf("Hello fom core %d\n",omp_get_thread_num());
+
 printf("Hello fom core %d\n",omp_get_thread_num());
 }
 void generic_function1(void* gen_var1){
 {
-{    printf("esse teste veio do core ");    printf("%d\n",omp_get_thread_num());
+    printf("esse teste veio do core ");
+    printf("%d\n",omp_get_thread_num());
 }
+
 }
 void caller(void* arg){
 int x = (int)arg;

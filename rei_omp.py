@@ -49,50 +49,38 @@ for linha in arq1:
         texto.append("\nparallel_function"+str(contador)+"(0)\n")
         print("entrei na zona paralela")
         continue
-#        print("o que que ta acontecendo aqui?\n")
     elif flagomp: #to dentro de um pragma?
-        
-        if (re.search("{",linha)):
-                flagchave2=1
-                flagchave=flagchave+1
+        if(re.search("{",linha)and flagchave == 0):
+            print("entramos na flagchave\n")
+            flagchave = 1
+        elif not flagchave:#a zona paralela é só a próxima linha
+            flagomp = 0
+            print(linha)
+            contador = contador +1
+            func.append("\n"+linha)
+            functions.append(func)
+            func = []
+            print("sai da zona paralela")
+
+        if flagchave:#estamos dentro de uma zona paralela
                 func.append(linha+"\n")
-        elif re.search("{",linha) and re.search("}",linha) or (not re.search("}",linha)):
-                func.append(linha+"\n")
-                flagchave2=1
-        elif re.search("}",linha):
-                flagchave=flagchave-1
-                if not flagchave:
-                    flagchave2=0
-        elif(flagchave2):
-            func.append(linha)
-        if(flagchave==0):
-                flagomp = 0
-                
-                contador = contador +1
-                func.append("\n"+linha)
-                functions.append(func)
-                func = []
-                print("sai da zona paralela")
-#                       if (re.search("{", linha)): #tem chaves internas?
-#                    flagchave2=flagchave2+1
-#                    func.append(linha)
-#                elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
-#                        func.append(linha)
-#                        flagchave2 = flagchave2 +1
-#                elif flagchave2:#ainda estou na chave interna
-#                        func.append(linha)
-#                elif re.search("}",linha):#a regiao paralela fechou?
-#                    func.append("\n"+linha)
-#                    flagomp = 0
-#                    contador = contador + 1
-#                    functions.append(func)
-#                    func = []
-       # else:#so a prox linha e paralela
-       #         func.append("   "+linha)
-       #         flagomp = 0
-       #         functions.append(func)
-       #         func =[]
-       #         contador = contador +1
+                print(linha+"\n")
+                if re.search("{",linha):#tem chaves internas
+                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
+                        print("o numero de chaves relativo : "+str(flagchave2)+"\n")
+                elif re.search("}",linha):
+                        flagchave2=flagchave2-linha.count("}")
+                        print("o numero de chaves relativo e: "+str(flagchave2)+"\n")
+                if(flagchave2==0 and re.search("}",linha)):
+                        print("eu sou uma piada para você?\n")
+                        flagchave=0
+                        flagomp = 0
+                        print(linha)
+                        contador = contador +1
+                        functions.append(func)
+                        print(func)
+                        func = []
+                        print("sai da zona paralela com chaves")
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
@@ -100,7 +88,7 @@ for linha in arq1:
 
 for linha in library:
     arq2.write(linha+"\n")
-for cont2 in range (contador):
+for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     if(functions[cont2][0]=="{"):
         arq2.write("{\n")
