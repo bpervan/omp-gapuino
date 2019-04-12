@@ -44,7 +44,7 @@ for linha in arq1:
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
         continue
-    if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha): #é regiao paralela?
+    if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
         flagomp = 1
         texto.append("\nparallel_function"+str(contador)+"(0)\n")
 #       print("entrei aqui")
@@ -63,7 +63,7 @@ for linha in arq1:
                 elif flagchave2:#ainda estou na chave interna
                         func.append(linha)
                 elif re.search("}",linha):#a regiao paralela fechou?
-                    func.append(linha)
+                    func.append("\n"+linha)
                     flagomp = 0
                     contador = contador + 1
                     functions.append(func)
@@ -85,8 +85,6 @@ for cont2 in range (contador):
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     arq2.writelines(functions[cont2])
     arq2.write("\n}\n")
-    print(functions[cont2])
-    print("\n sou uma piada pra você?\n")
 arq2.write("void caller(void* arg){\n")
 arq2.write("int x = (int)arg;\n")
 for cont2 in range (contador):
@@ -104,10 +102,8 @@ flagchave=0
 flagchave2=0
 for linha in texto:
     if re.search("parallel",linha):
-        print("mayara eu te amo\n")
-        #arq2.write("generic_function"+str(contador - cont_paral)+"\n")
         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-        arq2.write("int *L1_mem = L1_Malloc(8);\n")
+      #  arq2.write("int *L1_mem = L1_Malloc(8);\n")
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
         cont_paral = cont_paral - 1
 
