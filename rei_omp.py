@@ -39,7 +39,7 @@ for linha in arq1:
     linha=linha.rstrip()
     if "<stdio>" in linha:
         continue
-    if re.search("omp.h", linha):
+    elif re.search("omp.h", linha):
         continue
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
@@ -47,33 +47,52 @@ for linha in arq1:
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
         flagomp = 1
         texto.append("\nparallel_function"+str(contador)+"(0)\n")
-#       print("entrei aqui")
+        print("entrei na zona paralela")
         continue
 #        print("o que que ta acontecendo aqui?\n")
     elif flagomp: #to dentro de um pragma?
+        
         if (re.search("{",linha)):
-                flagchave=1
-        if flagchave: #tem chaves na regiao?
-                if (re.search("{", linha)): #tem chaves internas?
-                    flagchave2=1
-                    func.append(linha)
-                elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
-                        func.append(linha)
-                        flagchave2 = 0
-                elif flagchave2:#ainda estou na chave interna
-                        func.append(linha)
-                elif re.search("}",linha):#a regiao paralela fechou?
-                    func.append("\n"+linha)
-                    flagomp = 0
-                    contador = contador + 1
-                    functions.append(func)
-                    func = []
-        else:#so a prox linha e paralela
-                func.append("   "+linha)
+                flagchave2=1
+                flagchave=flagchave+1
+                func.append(linha+"\n")
+        elif re.search("{",linha) and re.search("}",linha) or (not re.search("}",linha)):
+                func.append(linha+"\n")
+                flagchave2=1
+        elif re.search("}",linha):
+                flagchave=flagchave-1
+                if not flagchave:
+                    flagchave2=0
+        elif(flagchave2):
+            func.append(linha)
+        if(flagchave==0):
                 flagomp = 0
-                functions.append(func)
-                func =[]
+                
                 contador = contador +1
+                func.append("\n"+linha)
+                functions.append(func)
+                func = []
+                print("sai da zona paralela")
+#                       if (re.search("{", linha)): #tem chaves internas?
+#                    flagchave2=flagchave2+1
+#                    func.append(linha)
+#                elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
+#                        func.append(linha)
+#                        flagchave2 = flagchave2 +1
+#                elif flagchave2:#ainda estou na chave interna
+#                        func.append(linha)
+#                elif re.search("}",linha):#a regiao paralela fechou?
+#                    func.append("\n"+linha)
+#                    flagomp = 0
+#                    contador = contador + 1
+#                    functions.append(func)
+#                    func = []
+       # else:#so a prox linha e paralela
+       #         func.append("   "+linha)
+       #         flagomp = 0
+       #         functions.append(func)
+       #         func =[]
+       #         contador = contador +1
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
@@ -83,6 +102,8 @@ for linha in library:
     arq2.write(linha+"\n")
 for cont2 in range (contador):
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
+    if(functions[cont2][0]=="{"):
+        arq2.write("{\n")
     arq2.writelines(functions[cont2])
     arq2.write("\n}\n")
 arq2.write("void caller(void* arg){\n")
@@ -129,11 +150,11 @@ for linha in texto:
     if flag_main == 3:
          #print("sera q ta entrando aqui?")
          if (re.search("{", linha)): #tem chaves internas?
-            flagchave2=1
+            flagchave2=flagchave2+1
             arq2.write(linha)
          elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
             arq2.write(linha)
-            flagchave2 = 0
+            flagchave2 = flagchave2-1
          elif flagchave2 == 1:#ainda estou na chave interna
             arq2.write(linha)
          elif re.search("}",linha):#fim da main
@@ -145,14 +166,16 @@ for linha in texto:
          arq2.write(linha)# escreva as demais funções abaixo da main, todas as paralelas estao abaixo
 # o fim do arquivo chegou
    #arq2.write(
-print(texto)
+for linha_tex in texto:
+    print(linha_tex)
+#print(texto)
 #print("\n")
 #print(func)
-print(contador)
+#print(contador)
 #print("\n")
-print(functions)
+#print(functions)
 #arq2.writelines(texto)
-print(library)
+#print(library)
 #print(arq2)
 arq1.close()
 arq2.close()
