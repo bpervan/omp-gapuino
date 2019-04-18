@@ -32,8 +32,8 @@ func = []
 functions=[]
 texto = []
 contador = 0
-
-it = iter(arq1)
+flagpf = 0
+#it = iter(arq1)
 library =[]
 for linha in arq1:
     linha=linha.rstrip()
@@ -45,10 +45,17 @@ for linha in arq1:
         library.append(linha)
         continue
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
+
+
         flagomp = 1
         texto.append("\nparallel_function"+str(contador)+"(0)\n")
         print("entrei na zona paralela")
         continue
+    elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
+        flagpf = 1
+        texto.append("\nparallelfor_function"+str(contador)+"(0)\n")
+        print("achei parallel for de numero: "+str(contador)+"\n")
+
     elif flagomp: #to dentro de um pragma?
         if(re.search("{",linha)and flagchave == 0):
             print("entramos na flagchave\n")
@@ -110,61 +117,20 @@ flag_main=0
 flagchave=0
 flagchave2=0
 for linha in texto:
-    if re.search("parallel",linha):
+    if re.search("parallel_function",linha):
         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-      #  arq2.write("int *L1_mem = L1_Malloc(8);\n")
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
         cont_paral = cont_paral - 1
-
-        arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
+       # arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
         arq2.write("CLUSTER_Wait(0);\n")
         arq2.write("CLUSTER_Stop(0);\n")
-    if re.search("main",linha) and re.search("{",linha):
-        flag_main = 1# chave ao lado da main
-        arq.write(linha)
-        flag_main = 3
-        continue
-    elif re.search("main",linha):
-        flag_main = 2#chave abaixo da main
-        arq2.write(linha+"\n")
-        continue
-    elif flag_main ==2 and re.search("{",linha):
-         flag_main = 3
-         arq2.write(linha+"\n")
-         continue
-  #  elif flag_main == 3:
-  #       flag_main = 4
-  #       continue
-    if flag_main == 3:
-         #print("sera q ta entrando aqui?")
-         if (re.search("{", linha)): #tem chaves internas?
-            flagchave2=flagchave2+1
-            arq2.write(linha)
-         elif (flagchave2 and re.search("}", linha)): #a chave interna fechou?
-            arq2.write(linha)
-            flagchave2 = flagchave2-1
-         elif flagchave2 == 1:#ainda estou na chave interna
-            arq2.write(linha)
-         elif re.search("}",linha):#fim da main
-            print("votz chegou aqui e agora?\n")
-            flag_main=0
-            arq2.write("exit(0);\n}\n")
-            print("exit(0);\n}\n)") 
     else:
-         arq2.write(linha)# escreva as demais funções abaixo da main, todas as paralelas estao abaixo
-# o fim do arquivo chegou
-   #arq2.write(
+         arq2.write(linha+"\n")# o fim do arquivo chegou
 for linha_tex in texto:
     print(linha_tex)
-#print(texto)
-#print("\n")
-#print(func)
-#print(contador)
-#print("\n")
-#print(functions)
-#arq2.writelines(texto)
-#print(library)
-#print(arq2)
+for lista in functions:
+    for linha_tex in lista:
+        print(linha_tex)
 arq1.close()
 arq2.close()
 
