@@ -35,6 +35,8 @@ contador = 0
 flagpf = 0
 #it = iter(arq1)
 library =[]
+structures =[]
+
 for linha in arq1:
     linha=linha.rstrip()
     if "<stdio>" in linha:
@@ -49,25 +51,32 @@ for linha in arq1:
 
         flagomp = 1
         texto.append("\nparallel_function"+str(contador)+"(0)\n")
-        print("entrei na zona paralela")
         continue
     elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
+        if not re.search("default",linha):
+                print(linha)
+                print("use default(none) directive to parallel for")
+                break;
+        else:
+                new_linha = re.findall(r'private\((.*?)\)',linha)
+                print(new_linha)
+                texto.append(new_linha[0])
+
+        re.sub(' +',' ',linha)
         flagpf = 1
         texto.append("\nparallelfor_function"+str(contador)+"(0)\n")
         print("achei parallel for de numero: "+str(contador)+"\n")
 
+        continue
     elif flagomp: #to dentro de um pragma?
         if(re.search("{",linha)and flagchave == 0):
-            print("entramos na flagchave\n")
             flagchave = 1
         elif not flagchave:#a zona paralela é só a próxima linha
             flagomp = 0
-            print(linha)
             contador = contador +1
             func.append("\n"+linha)
             functions.append(func)
             func = []
-            print("sai da zona paralela")
 
         if flagchave:#estamos dentro de uma zona paralela
                 func.append(linha+"\n")
@@ -88,6 +97,14 @@ for linha in arq1:
                         print(func)
                         func = []
                         print("sai da zona paralela com chaves")
+    elif flagpf:
+        if flagpf==1:
+                            flagpf=0
+        if(re.search("{",linha)and flagchave == 0):
+            print("entramos na flagchave\n")
+            flagchave = 1
+            func.append("new_n = estrutura.n/CORE_NUMBER\n")
+        
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
@@ -126,11 +143,11 @@ for linha in texto:
         arq2.write("CLUSTER_Stop(0);\n")
     else:
          arq2.write(linha+"\n")# o fim do arquivo chegou
-for linha_tex in texto:
-    print(linha_tex)
-for lista in functions:
-    for linha_tex in lista:
-        print(linha_tex)
+##for linha_tex in texto:
+##    print(linha_tex)
+##for lista in functions:
+##    for linha_tex in lista:
+##        print(linha_tex)
 arq1.close()
 arq2.close()
 
