@@ -33,6 +33,10 @@ CLUSTER_Stop(0);
 int main()
 {
     int a,b=10,c=2;
+estrutura1 L1_vect1
+L1_vect = L1_malloc(CORE_NUMBER*sizeof(estrutura1)
+L1_vect.a=a
+L1_vect.ricardo_milos=ricardo_milos
 a,ricardo_milos
 
 parallelfor_function1(0)

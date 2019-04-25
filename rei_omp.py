@@ -60,8 +60,15 @@ for linha in arq1:
         else:
                 new_linha = re.findall(r'private\((.*?)\)',linha)
                 print(new_linha)
-                texto.append(new_linha[0])
-
+                prov_var = new_linha[0].split(',')
+                print(prov_var)
+                prov_struct = []
+                texto.append("estrutura"+str(contador)+" L1_vect"+str(contador))
+                texto.append("L1_vect = L1_malloc(CORE_NUMBER*sizeof(estrutura"+str(contador)+")")
+                var_len = len(prov_var)
+                for vari in range(var_len):
+                    prov_struct.append("L1_vect."+str(prov_var[vari])+"="+str(prov_var[vari]))
+                structures.append(prov_struct)
         re.sub(' +',' ',linha)
         flagpf = 1
         texto.append("\nparallelfor_function"+str(contador)+"(0)\n")
@@ -141,6 +148,14 @@ for linha in texto:
        # arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
         arq2.write("CLUSTER_Wait(0);\n")
         arq2.write("CLUSTER_Stop(0);\n")
+    elif re.search("parallelfor_function",linha):
+        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
+        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
+        cont_paral = cont_paral - 1
+       # arq2.write("printf(\"Waiting..."+"\\"+"n\");\n")
+        arq2.write("CLUSTER_Wait(0);\n")
+        arq2.write("CLUSTER_Stop(0);\n")
+
     else:
          arq2.write(linha+"\n")# o fim do arquivo chegou
 ##for linha_tex in texto:
