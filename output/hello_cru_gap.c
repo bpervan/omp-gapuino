@@ -8,6 +8,8 @@
 #define CORE_NUMBER   (8)
 #include <stdio.h>
 #include "omp_gap8.h"
+typedef struct L1_structure0{
+L1_vect.a=aL1_vect.ricardo_milos=ricardo_milos}L1_structure0
 void generic_function0(void* gen_var0){
 
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
@@ -33,14 +35,12 @@ CLUSTER_Stop(0);
 int main()
 {
     int a,b=10,c=2;
-estrutura1 L1_vect1
-L1_vect = L1_malloc(CORE_NUMBER*sizeof(estrutura1)
-L1_vect.a=a
-L1_vect.ricardo_milos=ricardo_milos
-a,ricardo_milos
-
-parallelfor_function1(0)
-
+L1_structure0 L1_vect0
+L1_vect = L1_malloc(CORE_NUMBER*sizeof(L1_structure0)
+CLUSTER_Start(0, CORE_NUMBER);
+CLUSTER_SendTask(0, Master_Entry, (void *)1, 0);
+CLUSTER_Wait(0);
+CLUSTER_Stop(0);
 {
     a+=b*i;
     c+=a;

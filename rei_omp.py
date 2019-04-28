@@ -36,7 +36,8 @@ flagpf = 0
 #it = iter(arq1)
 library =[]
 structures =[]
-
+count_parallelfor=0
+it_arq1 = iter(arq1)
 for linha in arq1:
     linha=linha.rstrip()
     if "<stdio>" in linha:
@@ -58,22 +59,20 @@ for linha in arq1:
                 print("use default(none) directive to parallel for")
                 break;
         else:
+                new_linha = re.findall(r'shared\((.*?)\)',linha)
                 new_linha = re.findall(r'private\((.*?)\)',linha)
-                print(new_linha)
                 prov_var = new_linha[0].split(',')
-                print(prov_var)
                 prov_struct = []
-                texto.append("estrutura"+str(contador)+" L1_vect"+str(contador))
-                texto.append("L1_vect = L1_malloc(CORE_NUMBER*sizeof(estrutura"+str(contador)+")")
-                var_len = len(prov_var)
+                texto.append("L1_structure"+str(count_parallelfor)+" L1_vect"+str(count_parallelfor))
+                texto.append("L1_vect = L1_malloc(CORE_NUMBER*sizeof(L1_structure"+str(count_parallelfor)+")")
+                var_len = len(prov_var) 
                 for vari in range(var_len):
                     prov_struct.append("L1_vect."+str(prov_var[vari])+"="+str(prov_var[vari]))
                 structures.append(prov_struct)
-        re.sub(' +',' ',linha)
+                
         flagpf = 1
-        texto.append("\nparallelfor_function"+str(contador)+"(0)\n")
-        print("achei parallel for de numero: "+str(contador)+"\n")
-
+        texto.append("\nparallelfor_function"+str(count_parallelfor)+"(0)\n")
+        print("achei parallel for de numero: "+str(count_parallelfor)+"\n")
         continue
     elif flagomp: #to dentro de um pragma?
         if(re.search("{",linha)and flagchave == 0):
@@ -87,7 +86,6 @@ for linha in arq1:
 
         if flagchave:#estamos dentro de uma zona paralela
                 func.append(linha+"\n")
-                print(linha+"\n")
                 if re.search("{",linha):#tem chaves internas
                         flagchave2=flagchave2+linha.count("{")-linha.count("}")
                         print("o numero de chaves relativo : "+str(flagchave2)+"\n")
@@ -105,12 +103,57 @@ for linha in arq1:
                         func = []
                         print("sai da zona paralela com chaves")
     elif flagpf:
-        if flagpf==1:
-                            flagpf=0
-        if(re.search("{",linha)and flagchave == 0):
-            print("entramos na flagchave\n")
-            flagchave = 1
-            func.append("new_n = estrutura.n/CORE_NUMBER\n")
+
+
+
+        #lets seek for iterator var and limmit of iteration
+        for_iter = re.findall("(\(.*?\;)",linha)[0]
+        print(for_iter)
+        for_stop = re.findall("\;.*?\;",linha)[0]
+        print(for_stop)
+        for_modifier = re.findall("(\;[^\;)]*\))",linha)[0]
+        print(for_modifier)
+        count_parallelfor = count_parallelfor + 1
+        if re.search(">=",for_stop):
+            n = for_stop.split(">=")[1]
+        elif re.search("<=",for_stop):
+            n = for_stop.split("<=")[1]
+        elif re.search("!=",for_stop):
+            n = for_stop.split("!=")[1]
+        elif re.search("<",for_stop):
+            n = for_stop.split("<")[1]
+        elif re.search(">",for_stop):
+            n = for_stop.split(">")[1]
+        print(n.split(";")[0])
+        #        if(re.search("{",linha)and flagchave == 0):
+#            flagchave = 1
+#        elif not flagchave:#a zona paralela é só a próxima linha
+#            flagpf = 0
+#            contador = contador +1
+#            func.append("\n"+linha)
+#            functions.append(func)
+#            func = []
+#
+#        if flagchave:#estamos dentro de uma zona paralela
+#                func.append(linha+"\n")
+#                if re.search("{",linha):#tem chaves internas
+#                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
+#                        print("o numero de chaves relativo : "+str(flagchave2)+"\n")
+#                elif re.search("}",linha):
+#                        flagchave2=flagchave2-linha.count("}")
+#                        print("o numero de chaves relativo e: "+str(flagchave2)+"\n")
+#                if(flagchave2==0 and re.search("}",linha)):
+#                        print("eu sou uma piada para você?\n")
+#                        flagchave=0
+#                        flagomp = 0
+#                        print(linha)
+#                        contador = contador +1
+#                        functions.append(func)
+#                        print(func)
+#                        func = []
+#                        print("sai da zona paralela com chaves")
+
+        flagpf=0
         
     else:#nao e regiao paralela
          texto.append(linha)
@@ -119,6 +162,13 @@ for linha in arq1:
 
 for linha in library:
     arq2.write(linha+"\n")
+len_structures = len(structures)
+for cont2 in range(len_structures):
+    arq2.write("typedef struct L1_structure"+str(cont2)+"{\n")
+    arq2.writelines(structures[cont2])
+    arq2.write("}L1_structure"+str(cont2)+"\n")
+    
+
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     if(functions[cont2][0]=="{"):
