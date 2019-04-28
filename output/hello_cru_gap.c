@@ -15,8 +15,10 @@ void generic_function0(void* gen_var0){
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 }
 void generic_function1(void* gen_var1){
-int new_n = (L1_structure1.100/CORES_NUMBER)*(omp_get_thread_num()+1)
+L1_structure0 L1_structure = (L1_structure0) gen_var1
+int new_n = (L1_structure0.n/CORES_NUMBER)*(omp_get_thread_num()+1)
 for(int itpf = L1_structure.i; itpf<new_n;i++)
+{
 
 }
 void caller(void* arg){
@@ -41,6 +43,7 @@ CLUSTER_Stop(0);
 int main()
 {
     int a,b=10,c=2;
+    n = 2000;
 L1_structure0 L1_vect0
 L1_vect = L1_malloc(CORE_NUMBER*sizeof(L1_structure0)
 CLUSTER_Start(0, CORE_NUMBER);

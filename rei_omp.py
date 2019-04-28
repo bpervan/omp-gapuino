@@ -113,7 +113,6 @@ for linha in arq1:
         print(for_stop)
         for_modifier = re.findall("(\;[^\;)]*\))",linha)[0]
         print(for_modifier)
-        count_parallelfor = count_parallelfor + 1
         if re.search(">=",for_stop):
             n = for_stop.split(">=")[1]
             i = for_stop.split(">=")[0]
@@ -143,8 +142,9 @@ for linha in arq1:
         print(modifier)
         starter = for_iter.split("=")[1].split(";")[0].strip()
         print(starter)
-        func.append("int new_n = (L1_structure"+str(count_parallelfor)+"."+str(n)+"/CORES_NUMBER)*(omp_get_thread_num()+1)\n")
-        func.append("for(int itpf = L1_structure."+str(itpf)+"; "+"itpf"+operator+"new_n;"+modifier+")\n")
+        func.append("L1_structure"+str(count_parallelfor)+" L1_structure = (L1_structure"+str(count_parallelfor)+") gen_var"+str(contador)+"\n")
+        func.append("int new_n = (L1_structure"+str(count_parallelfor)+"."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1)\n")
+        func.append("for(int itpf = L1_structure."+str(itpf)+"; "+"itpf"+operator+"new_n;"+modifier+")\n{\n")
 
         #        if(re.search("{",linha)and flagchave == 0):
 #            flagchave = 1
@@ -175,6 +175,7 @@ for linha in arq1:
 #                        print("sai da zona paralela com chaves")
         functions.append(func)
         flagpf=0
+        count_parallelfor = count_parallelfor + 1
         contador = contador + 1
     else:#nao e regiao paralela
          texto.append(linha)

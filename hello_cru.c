@@ -11,8 +11,9 @@ printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 int main()
 {
     int a,b=10,c=2;
+    n = 2000;
 #pragma omp parallel for default(none) private(a,ricardo_milos) shared(b,c) 
-for (int i = 0 ; i < 100 ;  i++  )
+for (int i = 0 ; i < n ;  i++  )
 {
     a+=b*i;
     c+=a;
