@@ -14,9 +14,15 @@ void generic_function0(void* gen_var0){
 
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 }
+void generic_function1(void* gen_var1){
+int new_n = (L1_structure1.100/CORES_NUMBER)*(omp_get_thread_num()+1)
+for(int itpf = L1_structure.i; itpf<new_n;i++)
+
+}
 void caller(void* arg){
 int x = (int)arg;
 if(x ==0)return generic_function0(0);
+if(x ==1)return generic_function1(0);
 }
 
 

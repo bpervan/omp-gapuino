@@ -12,7 +12,7 @@ int main()
 {
     int a,b=10,c=2;
 #pragma omp parallel for default(none) private(a,ricardo_milos) shared(b,c) 
-for (int i=0; i<100;i++)
+for (int i = 0 ; i < 100 ;  i++  )
 {
     a+=b*i;
     c+=a;

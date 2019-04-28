@@ -116,15 +116,36 @@ for linha in arq1:
         count_parallelfor = count_parallelfor + 1
         if re.search(">=",for_stop):
             n = for_stop.split(">=")[1]
+            i = for_stop.split(">=")[0]
+            operator = ">="
         elif re.search("<=",for_stop):
             n = for_stop.split("<=")[1]
+            i = for_stop.split("<=")[0]
+            operator = "<="
         elif re.search("!=",for_stop):
             n = for_stop.split("!=")[1]
+            i = for_stop.split("!=")[0]
+            operator = "!="
         elif re.search("<",for_stop):
             n = for_stop.split("<")[1]
+            i = for_stop.split("<")[0]
+            operator = "<"
         elif re.search(">",for_stop):
             n = for_stop.split(">")[1]
-        print(n.split(";")[0])
+            i = for_stop.split(">")[0]
+            operator = ">"
+        n = n.split(";")[0].strip()
+        print(n)
+        itpf = i.split(";")[1].strip()
+        print (itpf)
+        print(operator)
+        modifier = for_modifier.split(";")[1].split(")")[0].strip()
+        print(modifier)
+        starter = for_iter.split("=")[1].split(";")[0].strip()
+        print(starter)
+        func.append("int new_n = (L1_structure"+str(count_parallelfor)+"."+str(n)+"/CORES_NUMBER)*(omp_get_thread_num()+1)\n")
+        func.append("for(int itpf = L1_structure."+str(itpf)+"; "+"itpf"+operator+"new_n;"+modifier+")\n")
+
         #        if(re.search("{",linha)and flagchave == 0):
 #            flagchave = 1
 #        elif not flagchave:#a zona paralela é só a próxima linha
@@ -152,9 +173,9 @@ for linha in arq1:
 #                        print(func)
 #                        func = []
 #                        print("sai da zona paralela com chaves")
-
+        functions.append(func)
         flagpf=0
-        
+        contador = contador + 1
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
