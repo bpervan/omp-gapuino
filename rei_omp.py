@@ -38,6 +38,7 @@ library =[]
 structures =[]
 count_parallelfor=0
 it_arq1 = iter(arq1)
+lista_var_pf=[]
 for linha in arq1:
     linha=linha.rstrip()
     if "<stdio>" in linha:
@@ -60,14 +61,19 @@ for linha in arq1:
                 break;
         else:
                 new_linha = re.findall(r'shared\((.*?)\)',linha)
-                new_linha = re.findall(r'private\((.*?)\)',linha)
-                prov_var = new_linha[0].split(',')
+                lista_var_pf.append(new_linha[0].split(','))
                 prov_struct = []
-                texto.append("L1_structure"+str(count_parallelfor)+" L1_vect"+str(count_parallelfor))
-                texto.append("L1_vect = L1_malloc(CORE_NUMBER*sizeof(L1_structure"+str(count_parallelfor)+")")
+                prov_var=[]
+                prov_var = re.findall(r'shared\((.*?)\)',linha)[0].split(',')+re.findall(r'private\((.*?)\)',linha)[0].split(',')
+                new_linha = re.findall(r'private\((.*?)\)',linha)
+                #prov_var = new_linha[0].split(',')
+                texto.append("L1_structure"+str(count_parallelfor)+" L1_vect"+str(count_parallelfor)+"\n")
+                texto.append("L1_vect = L1_malloc(CORE_NUMBER*sizeof(L1_structure"+str(count_parallelfor)+")\n")
                 var_len = len(prov_var) 
+                print(prov_var)
                 for vari in range(var_len):
-                    prov_struct.append("L1_vect."+str(prov_var[vari])+"="+str(prov_var[vari]))
+                    prov_struct.append("int "+str(prov_var[vari])+"\n")
+                texto.append("L1_vect."+str(prov_var[vari])+"="+str(prov_var[vari])+"\n")
                 structures.append(prov_struct)
                 
         flagpf = 1
@@ -102,7 +108,7 @@ for linha in arq1:
                         print(func)
                         func = []
                         print("sai da zona paralela com chaves")
-    elif flagpf:
+    elif flagpf==1:
 
 
 
@@ -134,9 +140,12 @@ for linha in arq1:
             i = for_stop.split(">")[0]
             operator = ">"
         n = n.split(";")[0].strip()
+        if n.isdigit():
+            texto.append("new_n = "+n+"\n")
+
         print(n)
-        itpf = i.split(";")[1].strip()
-        print (itpf)
+        i = i.split(";")[1].strip()
+        print (i)
         print(operator)
         modifier = for_modifier.split(";")[1].split(")")[0].strip()
         print(modifier)
@@ -144,39 +153,40 @@ for linha in arq1:
         print(starter)
         func.append("L1_structure"+str(count_parallelfor)+" L1_structure = (L1_structure"+str(count_parallelfor)+") gen_var"+str(contador)+"\n")
         func.append("int new_n = (L1_structure"+str(count_parallelfor)+"."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1)\n")
-        func.append("for(int itpf = L1_structure."+str(itpf)+"; "+"itpf"+operator+"new_n;"+modifier+")\n{\n")
+        func.append("for(L1_structure."+i+"= ("+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); "+"L1_structure."+i+operator+"new_n;L1_structure."+modifier+")\n{\n")
+        flagpf=2
+    if flagpf==2:
+ 
 
-        #        if(re.search("{",linha)and flagchave == 0):
-#            flagchave = 1
-#        elif not flagchave:#a zona paralela é só a próxima linha
-#            flagpf = 0
-#            contador = contador +1
-#            func.append("\n"+linha)
-#            functions.append(func)
-#            func = []
-#
-#        if flagchave:#estamos dentro de uma zona paralela
-#                func.append(linha+"\n")
-#                if re.search("{",linha):#tem chaves internas
-#                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
-#                        print("o numero de chaves relativo : "+str(flagchave2)+"\n")
-#                elif re.search("}",linha):
-#                        flagchave2=flagchave2-linha.count("}")
-#                        print("o numero de chaves relativo e: "+str(flagchave2)+"\n")
-#                if(flagchave2==0 and re.search("}",linha)):
-#                        print("eu sou uma piada para você?\n")
-#                        flagchave=0
-#                        flagomp = 0
-#                        print(linha)
-#                        contador = contador +1
-#                        functions.append(func)
-#                        print(func)
-#                        func = []
-#                        print("sai da zona paralela com chaves")
-        functions.append(func)
-        flagpf=0
-        count_parallelfor = count_parallelfor + 1
-        contador = contador + 1
+
+        if(re.search("{",linha)and flagchave == 0):
+            flagchave = 1
+        elif not flagchave:#a zona paralela é só a próxima linha
+            flagpf = 0
+            contador = contador +1
+            func.append("\n"+linha)
+            functions.append(func)
+            func = []
+
+        if flagchave:#estamos dentro de uma zona paralela
+                func.append(linha+"\n")
+                if re.search("{",linha):#tem chaves internas
+                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
+                        print("o numero de chaves relativo : "+str(flagchave2)+"\n")
+                elif re.search("}",linha):
+                        flagchave2=flagchave2-linha.count("}")
+                        print("o numero de chaves relativo e: "+str(flagchave2)+"\n")
+                if(flagchave2==0 and re.search("}",linha)):
+                        print("eu sou uma piada para você?\n")
+                        flagchave=0
+                        flagpf = 0
+                        print(linha)
+                        contador = contador +1
+                        functions.append(func)
+                        print(func)
+                        func = []
+                        print("sai da zona paralela com chaves")
+                        count_parallelfor = count_parallelfor+1
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
@@ -193,8 +203,8 @@ for cont2 in range(len_structures):
 
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
-    if(functions[cont2][0]=="{"):
-        arq2.write("{\n")
+   # if(functions[cont2][0]=="{"):
+    #    arq2.write("{\n")
     arq2.writelines(functions[cont2])
     arq2.write("\n}\n")
 arq2.write("void caller(void* arg){\n")
