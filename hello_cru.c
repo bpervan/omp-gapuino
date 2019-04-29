@@ -10,16 +10,15 @@ printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 
 int main()
 {
-    int a,b=10,c=2;
-    n = 2000;
+    int a,b=10,c=2,ricardo_milos = 30;
+    int nada = 2000;
 #pragma omp parallel for default(none) private(a,ricardo_milos) shared(b,c) 
-for (int i = 0 ; i < n ;  i++  )
+for (int i = 0 ; i < nada; i++  )
 {
     a+=b*i;
     c+=a;
     printf("o valor de a no core %d e: %d\n",a,omp_get_thread_num());
 }
-printf("Hello fom core %d\n",omp_get_thread_num());
 function();
     //teste na main
     //outro teste
