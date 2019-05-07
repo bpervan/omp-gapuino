@@ -26,9 +26,19 @@ L1_structure0 L1_structure = (L1_structure0) estrutura0;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
-    a+=b*i;
-    c+=a;
-    printf("o valor de a no core %d e: %d\n",a,omp_get_thread_num());
+    L1_structure.a+=L1_structure.b*i;
+if(omp_get_thread_num()==0)
+    {
+
+
+        L1_structure.c+=L1_structure.a;
+
+
+
+
+
+    }
+    printf("o valor de a no core %d e: %d\n",L1_structure.a,omp_get_thread_num());
 }
 
 }

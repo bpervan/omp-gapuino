@@ -48,6 +48,8 @@ for linha in arq1:
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
         continue
+    
+
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
 
         flagomp = 1
@@ -81,6 +83,9 @@ for linha in arq1:
                 flagpf=1
                 continue
     if flagomp: #to dentro de um pragma?
+        if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
+            func.append("if(omp_get_thread_num()==0\n")
+            continue
         if(re.search("{",linha)and flagchave == 0):
             flagchave = 1
         elif not flagchave:#a zona paralela é só a próxima linha
@@ -160,7 +165,9 @@ for linha in arq1:
         structures[count_parallelfor].append("int "+str(i)+";\n")
         flagpf=2
     elif flagpf==2:
-        
+        if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
+            func.append("if(omp_get_thread_num()==0)\n")
+            continue
         if(re.search("{",linha)and flagchave == 0):
             flagchave = 1
         elif not flagchave:#o for é só a próxima linha

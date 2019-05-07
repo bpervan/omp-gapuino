@@ -16,7 +16,17 @@ int main()
 for (int i = 0 ; i < nada; i++  )
 {
     a+=b*i;
-    c+=a;
+#pragma omp single
+    {   
+        
+        
+        c+=a;
+
+
+
+
+
+    }
     printf("o valor de a no core %d e: %d\n",a,omp_get_thread_num());
 }
 function();
