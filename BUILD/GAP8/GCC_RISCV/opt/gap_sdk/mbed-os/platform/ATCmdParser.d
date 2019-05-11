@@ -1,18 +1,60 @@
 /home/reinaldo/workspace/omp-gapuino/BUILD/GAP8/GCC_RISCV//opt/gap_sdk/mbed-os/platform/ATCmdParser.o: \
  /opt/gap_sdk/mbed-os/platform/ATCmdParser.cpp \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/mbed_config.h \
- /opt/gap_sdk/mbed-os/platform/ATCmdParser.h \
+ /opt/gap_sdk/mbed-os/platform/ATCmdParser.h /opt/gap_sdk/mbed-os/mbed.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_version.h \
+ /opt/gap_sdk/mbed-os/rtos/rtos.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/mbed_rtos_storage.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx5/RTX/Include/rtx_os.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx5/Include/cmsis_os2.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/mbed_rtx_conf.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/mbed_rtx.h \
+ /opt/gap_sdk/mbed-os/rtos/Kernel.h /opt/gap_sdk/mbed-os/rtos/Thread.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/mbed_rtos1_types.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx4/cmsis_os.h \
  /opt/gap_sdk/mbed-os/platform/Callback.h \
  /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
  /opt/gap_sdk/mbed-os/platform/mbed_preprocessor.h \
  /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
- /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/platform/NonCopyable.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/platform/mbed_debug.h \
+ /opt/gap_sdk/mbed-os/rtos/Semaphore.h /opt/gap_sdk/mbed-os/rtos/Mutex.h \
+ /opt/gap_sdk/mbed-os/platform/ScopedLock.h \
+ /opt/gap_sdk/mbed-os/rtos/ThisThread.h \
+ /opt/gap_sdk/mbed-os/rtos/RtosTimer.h /opt/gap_sdk/mbed-os/rtos/Mail.h \
+ /opt/gap_sdk/mbed-os/rtos/Queue.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_error.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_retarget.h \
+ /opt/gap_sdk/mbed-os/rtos/MemoryPool.h \
+ /opt/gap_sdk/mbed-os/rtos/MemoryPool.h /opt/gap_sdk/mbed-os/rtos/Queue.h \
+ /opt/gap_sdk/mbed-os/rtos/EventFlags.h \
+ /opt/gap_sdk/mbed-os/rtos/ConditionVariable.h \
+ /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx4/cmsis_os.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/nsapi.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/nsapi_types.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/SocketAddress.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/NetworkStack.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/NetworkInterface.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/nsapi_types.h \
+ /opt/gap_sdk/mbed-os/platform/Callback.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/DNS.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/EthInterface.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/WiFiInterface.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/WiFiAccessPoint.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/CellularBase.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/MeshInterface.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/Socket.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/UDPSocket.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/InternetSocket.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/TCPSocket.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/TCPServer.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/nsapi_ppp.h \
  /opt/gap_sdk/mbed-os/platform/FileHandle.h \
+ /opt/gap_sdk/mbed-os/platform/Callback.h \
  /opt/gap_sdk/mbed-os/platform/mbed_poll.h \
  /opt/gap_sdk/mbed-os/platform/platform.h \
- /opt/gap_sdk/mbed-os/platform/mbed_retarget.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/pins/device.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/api/objects.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/device/cmsis.h \
@@ -46,6 +88,7 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_pmu.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_fll.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_regulator.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_debug.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_uart.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_hyperbus.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_spi.h \
@@ -56,11 +99,9 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_timer.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_performance.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_cpi.h \
- /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_dmacpy.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_memcpy.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_fc_malloc.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_malloc.h \
- /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_debug.h \
- /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_bridge.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_fc_event.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/api/spi_regs.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/api/spi_multi_api.h \
@@ -68,5 +109,113 @@
  /opt/gap_sdk/mbed-os/hal/spi_api.h /opt/gap_sdk/mbed-os/hal/dma_api.h \
  /opt/gap_sdk/mbed-os/hal/buffer.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/api/gpio_object.h \
- /opt/gap_sdk/mbed-os/platform/NonCopyable.h \
+ /opt/gap_sdk/mbed-os/features/netsocket/NetworkStack.h \
+ /opt/gap_sdk/mbed-os/events/mbed_events.h \
+ /opt/gap_sdk/mbed-os/events/equeue/equeue.h \
+ /opt/gap_sdk/mbed-os/events/equeue/equeue_platform.h \
+ /opt/gap_sdk/mbed-os/events/EventQueue.h \
+ /opt/gap_sdk/mbed-os/events/Event.h \
+ /opt/gap_sdk/mbed-os/events/mbed_shared_queues.h \
+ /opt/gap_sdk/mbed-os/features/storage/filesystem/mbed_filesystem.h \
+ /opt/gap_sdk/mbed-os/features/storage/filesystem/FileSystem.h \
+ /opt/gap_sdk/mbed-os/platform/FileBase.h \
+ /opt/gap_sdk/mbed-os/platform/SingletonPtr.h \
+ /opt/gap_sdk/mbed-os/platform/PlatformMutex.h \
+ /opt/gap_sdk/mbed-os/platform/FileHandle.h \
+ /opt/gap_sdk/mbed-os/platform/DirHandle.h \
+ /opt/gap_sdk/mbed-os/platform/FileSystemLike.h \
+ /opt/gap_sdk/mbed-os/platform/FileSystemHandle.h \
+ /opt/gap_sdk/mbed-os/features/storage/blockdevice/BlockDevice.h \
+ /opt/gap_sdk/mbed-os/features/storage/filesystem/File.h \
+ /opt/gap_sdk/mbed-os/features/storage/filesystem/Dir.h \
+ /opt/gap_sdk/mbed-os/features/storage/blockdevice/ChainingBlockDevice.h \
+ /opt/gap_sdk/mbed-os/features/storage/blockdevice/BlockDevice.h \
+ /opt/gap_sdk/mbed-os/features/storage/blockdevice/SlicingBlockDevice.h \
+ /opt/gap_sdk/mbed-os/features/storage/blockdevice/HeapBlockDevice.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
+ /opt/gap_sdk/mbed-os/platform/platform.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_application.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_error.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_interface.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_debug.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalIn.h \
+ /opt/gap_sdk/mbed-os/hal/gpio_api.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_critical.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalOut.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalInOut.h \
+ /opt/gap_sdk/mbed-os/drivers/BusIn.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalIn.h \
+ /opt/gap_sdk/mbed-os/drivers/BusOut.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalOut.h \
+ /opt/gap_sdk/mbed-os/drivers/BusInOut.h \
+ /opt/gap_sdk/mbed-os/drivers/DigitalInOut.h \
+ /opt/gap_sdk/mbed-os/drivers/PortIn.h \
+ /opt/gap_sdk/mbed-os/hal/port_api.h \
+ /opt/gap_sdk/mbed-os/drivers/PortInOut.h \
+ /opt/gap_sdk/mbed-os/drivers/PortOut.h \
+ /opt/gap_sdk/mbed-os/drivers/AnalogIn.h \
+ /opt/gap_sdk/mbed-os/drivers/AnalogOut.h \
+ /opt/gap_sdk/mbed-os/drivers/PwmOut.h \
+ /opt/gap_sdk/mbed-os/hal/pwmout_api.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_power_mgmt.h \
+ /opt/gap_sdk/mbed-os/hal/sleep_api.h \
+ /opt/gap_sdk/mbed-os/hal/ticker_api.h \
+ /opt/gap_sdk/mbed-os/drivers/Serial.h \
+ /opt/gap_sdk/mbed-os/platform/Stream.h \
+ /opt/gap_sdk/mbed-os/platform/FileLike.h \
+ /opt/gap_sdk/mbed-os/drivers/SerialBase.h \
+ /opt/gap_sdk/mbed-os/hal/serial_api.h \
+ /opt/gap_sdk/mbed-os/platform/CThunk.h \
+ /opt/gap_sdk/mbed-os/drivers/SPI.h /opt/gap_sdk/mbed-os/hal/spi_api.h \
+ /opt/gap_sdk/mbed-os/platform/CircularBuffer.h \
+ /opt/gap_sdk/mbed-os/platform/FunctionPointer.h \
+ /opt/gap_sdk/mbed-os/platform/Transaction.h \
+ /opt/gap_sdk/mbed-os/drivers/HYPERBUS.h \
+ /opt/gap_sdk/mbed-os/hal/hyperbus_api.h \
+ /opt/gap_sdk/mbed-os/drivers/SPISlave.h \
+ /opt/gap_sdk/mbed-os/drivers/I2C.h /opt/gap_sdk/mbed-os/hal/i2c_api.h \
+ /opt/gap_sdk/mbed-os/drivers/I2CSlave.h \
+ /opt/gap_sdk/mbed-os/drivers/Ethernet.h \
+ /opt/gap_sdk/mbed-os/drivers/CAN.h \
+ /opt/gap_sdk/mbed-os/drivers/RawSerial.h \
+ /opt/gap_sdk/mbed-os/drivers/SerialBase.h \
+ /opt/gap_sdk/mbed-os/drivers/UARTSerial.h \
+ /opt/gap_sdk/mbed-os/drivers/InterruptIn.h \
+ /opt/gap_sdk/mbed-os/hal/gpio_irq_api.h \
+ /opt/gap_sdk/mbed-os/drivers/DoubleBufferingSerial.h \
+ /opt/gap_sdk/mbed-os/platform/PlatformMutex.h \
+ /opt/gap_sdk/mbed-os/hal/serial_api.h \
+ /opt/gap_sdk/mbed-os/drivers/FlashIAP.h \
+ /opt/gap_sdk/mbed-os/drivers/MbedCRC.h \
+ /opt/gap_sdk/mbed-os/drivers/TableCRC.h \
+ /opt/gap_sdk/mbed-os/hal/crc_api.h /opt/gap_sdk/mbed-os/drivers/QSPI.h \
+ /opt/gap_sdk/mbed-os/drivers/Timer.h \
+ /opt/gap_sdk/mbed-os/drivers/Ticker.h \
+ /opt/gap_sdk/mbed-os/drivers/TimerEvent.h \
+ /opt/gap_sdk/mbed-os/hal/us_ticker_api.h \
+ /opt/gap_sdk/mbed-os/hal/lp_ticker_api.h \
+ /opt/gap_sdk/mbed-os/drivers/Timeout.h \
+ /opt/gap_sdk/mbed-os/drivers/Ticker.h \
+ /opt/gap_sdk/mbed-os/drivers/LowPowerTimeout.h \
+ /opt/gap_sdk/mbed-os/drivers/LowPowerTicker.h \
+ /opt/gap_sdk/mbed-os/drivers/LowPowerTimer.h \
+ /opt/gap_sdk/mbed-os/drivers/Timer.h \
+ /opt/gap_sdk/mbed-os/platform/LocalFileSystem.h \
+ /opt/gap_sdk/mbed-os/drivers/InterruptIn.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_wait_api.h \
+ /opt/gap_sdk/mbed-os/hal/sleep_api.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_power_mgmt.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_rtc_time.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_poll.h \
+ /opt/gap_sdk/mbed-os/platform/ATCmdParser.h \
+ /opt/gap_sdk/mbed-os/platform/FileSystemHandle.h \
+ /opt/gap_sdk/mbed-os/platform/FileHandle.h \
+ /opt/gap_sdk/mbed-os/platform/DirHandle.h \
+ /opt/gap_sdk/mbed-os/platform/CriticalSectionLock.h \
+ /opt/gap_sdk/mbed-os/platform/DeepSleepLock.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_stats.h \
+ /opt/gap_sdk/mbed-os/platform/Callback.h \
+ /opt/gap_sdk/mbed-os/platform/FunctionPointer.h \
+ /opt/gap_sdk/mbed-os/platform/ScopedLock.h \
  /opt/gap_sdk/mbed-os/platform/mbed_poll.h

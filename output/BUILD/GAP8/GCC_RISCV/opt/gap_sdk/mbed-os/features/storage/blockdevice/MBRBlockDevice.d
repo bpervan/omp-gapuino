@@ -6,5 +6,4 @@
  /opt/gap_sdk/mbed-os/platform/mbed_critical.h \
  /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/platform/mbed_preprocessor.h \
- /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
- /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h
+ /opt/gap_sdk/mbed-os/platform/mbed_assert.h

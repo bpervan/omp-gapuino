@@ -42,6 +42,14 @@ lista_var_pf=[]
 schedule = 1
 prov_vars_private = ""
 prov_vars_shared = ""
+red_oper=""
+red_var=""
+flag_red=0
+
+
+
+
+
 for linha in arq1:
     linha=linha.rstrip()
     if re.search("<stdio>", linha):
@@ -58,7 +66,14 @@ for linha in arq1:
         flagomp = 1
         texto.append("parallel_function"+str(contador)+"(0)\n")
         continue
+
+
+
+
     elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
+    
+        
+        
         if not re.search("default",linha):
                 print(linha)
                 print("use default(none) directive to parallel for")
@@ -68,10 +83,16 @@ for linha in arq1:
                #verivy if have a reduction clause and identify the variable 
                 if re.search("reduction",linha) or re.search("reduction\(",linha):
                     print("tem reduction aqui\n")
-                    X_REDUCT_X = re.findall(r'reduction\((.+)\)',linha)[0]
-                    print(X_REDUCT_X)
+                    reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
+                    print(reduct)
+                    red_oper = reduct[0]
+                    red_var = reduct[1]
+                    texto.append("estrutura"+str(count_parallelfor)+'.'+red_var+"="+red_var+";\n")
+                    flag_red = 1
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+                if flag_red:
+                    prov_vars_shared.append(red_var)
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 print(prov_vars_shared)
@@ -89,6 +110,9 @@ for linha in arq1:
 #                print("debug aqui esse codigo\n")
                 flagpf=1
                 continue
+
+
+
     if flagomp: #to dentro de um pragma?
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
             func.append("if(omp_get_thread_num()==0)\n")
@@ -119,6 +143,10 @@ for linha in arq1:
      #                   print(func)
                         func = []
     #                    print("sai da zona paralela com chaves")
+
+
+
+
 
     elif flagpf==1:
 
@@ -168,10 +196,15 @@ for linha in arq1:
         texto.append("estrutura"+str(count_parallelfor)+"."+str(n)+" = "+str(n)+";\n")
         texto.append("\nparallelfor_function"+str(count_parallelfor)+"(0)\n")
 #need no more append the for limmits
-      #  structures[count_parallelfor].append("int "+str(n)+";\n")
-      #  structures[count_parallelfor].append("int "+str(i)+";\n")
+        structures[count_parallelfor].append("int "+str(n)+";\n")
+        structures[count_parallelfor].append("int "+str(i)+";\n")
         flagpf=2
+
+
+
+
     elif flagpf==2:
+
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
             func.append("if(omp_get_thread_num()==0)\n")
             continue
@@ -187,20 +220,64 @@ for linha in arq1:
             func.append("\n}\n")
             functions.append(func)
             func = []
+
+
+
+
         elif flagchave:#estamos dentro de um for paralelo
              # linha = re.sub(list_vari_for[0])
+                
+                
                 func.append("\n"+linha+"\n")
+            
+                
+                
                 if(flagchave2==0 and re.search("}",linha)):
 
                         flagchave=0
                         flagpf = 0
                         contador = contador +1
                         print(prov_vars_shared)
-                        r = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                        rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+                        rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                         func2=[]
+                        
+                        
+                        
                         for prov_line in func:
-                            func2.append(''.join(r.sub(r"L1_structure.\1",prov_line)))
-                        functions.append(func2)
+                            if re.search("\"",prov_line):
+                                prov2_line = prov_line.split("\"")
+                                prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
+                                func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                continue
+                            func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
+                        func3=[]
+                        
+                        
+                        
+                        
+                        for prov_line in func2:
+                            structu="estrutura"+str(count_parallelfor)+"."
+                            if re.search("\"",prov_line):
+                                prov2_line = prov_line.split("\"")
+                                prov3_line = ''.join(rs.sub("estrutura"+str(count_parallelfor)+'.'+r'\1',prov_line)).split("\"")
+                                func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                continue
+                            func3.append(''.join(rs.sub("estrutura"+str(count_parallelfor)+'.'+r'\1',prov_line)))
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        if flag_red:
+                            func3.append("EU_MutexLock(0);\n")
+                            func3.append("\nestrutura"+str(count_parallelfor)+"."+red_var+"=estrutura"+str(count_parallelfor)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
+                            func3.append("EU_MutexUnlock(0);\n")
+                            texto.append(red_var+"=estrutura"+str(count_parallelfor)+"."+red_var+";\n")
+                        functions.append(func3)
                         func = []
                         func2 = []
                         prov_vars_shared = []
@@ -211,6 +288,12 @@ for linha in arq1:
                         flagchave2=flagchave2+linha.count("{")-linha.count("}")
                 elif re.search("}",linha):
                         flagchave2=flagchave2-linha.count("}")
+
+
+
+
+
+
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called

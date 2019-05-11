@@ -11,8 +11,11 @@
 typedef struct L1_structure0{
 int a;
 int c;
+int soma;
 int b;
 int ricardo_milos;
+int nada;
+int i;
 }L1_structure0;
 L1_structure0 estrutura0;
 void generic_function0(void* gen_var0){
@@ -25,32 +28,24 @@ int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
 
-    L1_structure.a+=b*i;
+    estrutura0.a+=L1_structure.b+i;
 if(omp_get_thread_num()==0)
 
     {
 
-
-
-
-
-        L1_structure.c+=L1_structure.a;
-
-
-
-
-
-
-
-
-
-
+        estrutura0.c+=estrutura0.a;
 
     }
 
-    printf("o valor de L1_structure.a no core %d e: %d\n",L1_structure.a,omp_get_thread_num());
+    printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura0.a);
+
+    estrutura0.soma+=L1_structure.b+estrutura0.c;
 
 }
+EU_MutexLock(0);
+
+estrutura0.soma=estrutura0.soma+L1_structure.soma;
+EU_MutexUnlock(0);
 
 }
 void caller(void* arg){
@@ -74,11 +69,15 @@ CLUSTER_Stop(0);
 
 int main()
 {
-    int a,b=10,c=2,ricardo_milos = 30;
+    int soma=0,a,b=10,c=2,ricardo_milos = 30;
     int nada = 2000;
+estrutura0.soma=soma;
+
 estrutura0.a=a;
 
 estrutura0.c=c;
+
+estrutura0.soma=soma;
 
 estrutura0.b=b;
 
@@ -94,10 +93,12 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)1, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
+soma=estrutura0.soma;
+
 function();
     //teste na main
     //outro teste
-
+printf("o resultado da soma e %d\n",soma);
 exit (0);
 
 }

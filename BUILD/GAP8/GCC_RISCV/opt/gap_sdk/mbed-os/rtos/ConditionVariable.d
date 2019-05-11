@@ -18,7 +18,7 @@
  /opt/gap_sdk/mbed-os/platform/ScopedLock.h \
  /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/rtos/Semaphore.h /opt/gap_sdk/mbed-os/rtos/Kernel.h \
- /opt/gap_sdk/mbed-os/rtos/ThisThread.h \
+ /opt/gap_sdk/mbed-os/rtos/Thread.h \
  /opt/gap_sdk/mbed-os/platform/Callback.h \
  /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
  /opt/gap_sdk/mbed-os/platform/mbed_error.h \
