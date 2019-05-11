@@ -74,7 +74,7 @@ for linha in arq1:
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
-                
+                print(prov_vars_shared)
                 print(var_len)
                 print("\n serio vei?\n")
                 for vari in range(var_len):
@@ -179,35 +179,38 @@ for linha in arq1:
             flagchave = 1
         elif not flagchave:#o for é só a próxima linha
             #replacing shared variables with actual structure
-            replacer = re.compile(r"\b({})\b".format('|'.join(prov_vars_shared)))
             flagpf = 0
             contador = contador +1
+            func.append("\n"+linha+"\n")
            # print(replacer.sub(r'L1_structure.\1',linha)+"vots\n")
-            func.append("\n"+replacer.sub(r"L1_structure.\1",linha))
            # print(replacer.sub(r'L1_structure.\1',linha)+"sai nada nao\n")
             func.append("\n}\n")
             functions.append(func)
             func = []
         elif flagchave:#estamos dentro de um for paralelo
              # linha = re.sub(list_vari_for[0])
-                replacer = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                func.append(replacer.sub(r"L1_structure.\1",linha)+"\n")
-                print(replacer.sub(r"L1_structure.\1",linha)+"sai nada nao\n")
+                func.append("\n"+linha+"\n")
                 if(flagchave2==0 and re.search("}",linha)):
 
                         flagchave=0
                         flagpf = 0
                         contador = contador +1
-                        functions.append(func)
+                        print(prov_vars_shared)
+                        r = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                        func2=[]
+                        for prov_line in func:
+                            func2.append(''.join(r.sub(r"L1_structure.\1",prov_line)))
+                        functions.append(func2)
                         func = []
+                        func2 = []
+                        prov_vars_shared = []
+                        prov_vars_private = []
+                        prov_vars = []
                         count_parallelfor = count_parallelfor+1
                 elif re.search("{",linha):#tem chaves internas
                         flagchave2=flagchave2+linha.count("{")-linha.count("}")
                 elif re.search("}",linha):
                         flagchave2=flagchave2-linha.count("}")
-        prov_vars_shared = []
-        prov_vars_private = []
-        prov_vars = []
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called

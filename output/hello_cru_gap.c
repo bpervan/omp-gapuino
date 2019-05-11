@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include "omp_gap8.h"
 typedef struct L1_structure0{
-int b;
-int c;
 int a;
+int c;
+int b;
 int ricardo_milos;
 }L1_structure0;
 L1_structure0 estrutura0;
@@ -24,19 +24,32 @@ L1_structure0 L1_structure = (L1_structure0) estrutura0;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
-    L1_structure.aL1_structure.+=L1_structure.bL1_structure.*L1_structure.iL1_structure.;
+
+    L1_structure.a+=b*i;
 if(omp_get_thread_num()==0)
+
     {
 
 
-        L1_structure.cL1_structure.+=L1_structure.aL1_structure.;
+
+
+
+        L1_structure.c+=L1_structure.a;
+
+
+
+
+
+
 
 
 
 
 
     }
-    L1_structure.printfL1_structure.("L1_structure.oL1_structure. L1_structure.valorL1_structure. L1_structure.deL1_structure. L1_structure.aL1_structure. L1_structure.noL1_structure. L1_structure.coreL1_structure. %L1_structure.dL1_structure. L1_structure.eL1_structure.: %L1_structure.dL1_structure.\L1_structure.nL1_structure.",L1_structure.aL1_structure.,L1_structure.omp_get_thread_numL1_structure.());
+
+    printf("o valor de L1_structure.a no core %d e: %d\n",L1_structure.a,omp_get_thread_num());
+
 }
 
 }
@@ -63,11 +76,11 @@ int main()
 {
     int a,b=10,c=2,ricardo_milos = 30;
     int nada = 2000;
-estrutura0.b=b;
+estrutura0.a=a;
 
 estrutura0.c=c;
 
-estrutura0.a=a;
+estrutura0.b=b;
 
 estrutura0.ricardo_milos=ricardo_milos;
 
