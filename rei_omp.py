@@ -39,6 +39,9 @@ structures =[]
 count_parallelfor=0
 it_arq1 = iter(arq1)
 lista_var_pf=[]
+schedule = 1
+prov_vars_private = ""
+prov_vars_shared = ""
 for linha in arq1:
     linha=linha.rstrip()
     if re.search("<stdio>", linha):
@@ -62,12 +65,16 @@ for linha in arq1:
                 break;
         else:
                 prov_struct = []
-                
-
+               #verivy if have a reduction clause and identify the variable 
+                if re.search("reduction",linha) or re.search("reduction\(",linha):
+                    print("tem reduction aqui\n")
+                    X_REDUCT_X = re.findall(r'reduction\((.+)\)',linha)[0]
+                    print(X_REDUCT_X)
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
+                
                 print(var_len)
                 print("\n serio vei?\n")
                 for vari in range(var_len):
@@ -84,7 +91,7 @@ for linha in arq1:
                 continue
     if flagomp: #to dentro de um pragma?
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
-            func.append("if(omp_get_thread_num()==0\n")
+            func.append("if(omp_get_thread_num()==0)\n")
             continue
         if(re.search("{",linha)and flagchave == 0):
             flagchave = 1
@@ -160,9 +167,9 @@ for linha in arq1:
         texto.append("estrutura"+str(count_parallelfor)+"."+i+"= "+i+";\n")
         texto.append("estrutura"+str(count_parallelfor)+"."+str(n)+" = "+str(n)+";\n")
         texto.append("\nparallelfor_function"+str(count_parallelfor)+"(0)\n")
-
-        structures[count_parallelfor].append("int "+str(n)+";\n")
-        structures[count_parallelfor].append("int "+str(i)+";\n")
+#need no more append the for limmits
+      #  structures[count_parallelfor].append("int "+str(n)+";\n")
+      #  structures[count_parallelfor].append("int "+str(i)+";\n")
         flagpf=2
     elif flagpf==2:
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
@@ -171,17 +178,23 @@ for linha in arq1:
         if(re.search("{",linha)and flagchave == 0):
             flagchave = 1
         elif not flagchave:#o for é só a próxima linha
+            #replacing shared variables with actual structure
+            replacer = re.compile(r"\b({})\b".format('|'.join(prov_vars_shared)))
             flagpf = 0
             contador = contador +1
-            func.append("\n"+linha)
+           # print(replacer.sub(r'L1_structure.\1',linha)+"vots\n")
+            func.append("\n"+replacer.sub(r"L1_structure.\1",linha))
+           # print(replacer.sub(r'L1_structure.\1',linha)+"sai nada nao\n")
             func.append("\n}\n")
             functions.append(func)
             func = []
         elif flagchave:#estamos dentro de um for paralelo
              # linha = re.sub(list_vari_for[0])
-
-                func.append(linha+"\n")
+                replacer = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                func.append(replacer.sub(r"L1_structure.\1",linha)+"\n")
+                print(replacer.sub(r"L1_structure.\1",linha)+"sai nada nao\n")
                 if(flagchave2==0 and re.search("}",linha)):
+
                         flagchave=0
                         flagpf = 0
                         contador = contador +1

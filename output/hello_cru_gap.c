@@ -13,8 +13,6 @@ int b;
 int c;
 int a;
 int ricardo_milos;
-int nada;
-int i;
 }L1_structure0;
 L1_structure0 estrutura0;
 void generic_function0(void* gen_var0){
@@ -26,19 +24,19 @@ L1_structure0 L1_structure = (L1_structure0) estrutura0;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
-    L1_structure.a+=L1_structure.b*i;
+    L1_structure.aL1_structure.+=L1_structure.bL1_structure.*L1_structure.iL1_structure.;
 if(omp_get_thread_num()==0)
     {
 
 
-        L1_structure.c+=L1_structure.a;
+        L1_structure.cL1_structure.+=L1_structure.aL1_structure.;
 
 
 
 
 
     }
-    printf("o valor de a no core %d e: %d\n",L1_structure.a,omp_get_thread_num());
+    L1_structure.printfL1_structure.("L1_structure.oL1_structure. L1_structure.valorL1_structure. L1_structure.deL1_structure. L1_structure.aL1_structure. L1_structure.noL1_structure. L1_structure.coreL1_structure. %L1_structure.dL1_structure. L1_structure.eL1_structure.: %L1_structure.dL1_structure.\L1_structure.nL1_structure.",L1_structure.aL1_structure.,L1_structure.omp_get_thread_numL1_structure.());
 }
 
 }
