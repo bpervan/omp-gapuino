@@ -6,8 +6,6 @@
 #include "gap_dmamchan.h"
 #include <time.h>
 #define CORE_NUMBER   (8)
-CLUSTER_Start(0, CORE_NUMBER);
-estrutura0=L1_Malloc(CORE_NUMBER*sizeof(L1_structure0));
 #include <stdio.h>
 #include "omp_gap8.h"
 typedef struct L1_structure0{
@@ -15,11 +13,25 @@ int a;
 int c;
 int soma;
 int b;
-int ricardo_milos;
+int r2;
 int nada;
 int i;
+int IDstructure;
 }L1_structure0;
 L1_structure0* estrutura0;
+estrutura0->ID_structure=0;
+typedef struct L1_structure1{
+int a;
+int c;
+int soma;
+int b;
+int r;
+int nada;
+int i;
+int IDstructure;
+}L1_structure1;
+L1_structure1* estrutura1;
+estrutura1->ID_structure=1;
 void generic_function0(void* gen_var0){
 
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
@@ -50,10 +62,26 @@ estrutura0->soma=estrutura0->soma+L1_structure->soma;
 EU_MutexUnlock(0);
 
 }
+void generic_function2(void* gen_var2){
+L1_structure1 L1_structure = (L1_structure1) estrutura1;
+int new_n = (L1_structure->nada/CORE_NUMBER)*(omp_get_thread_num()+1);
+for(int i= 0+(L1_structure->nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
+{
+
+    estrutura1->a+=1;
+
+}
+EU_MutexLock(0);
+
+estrutura1->soma=estrutura1->soma+L1_structure->soma;
+EU_MutexUnlock(0);
+
+}
 void caller(void* arg){
-int x = (L1_structure1)arg;
+int x = (L1_structure2)arg;
 if(x ==0)return generic_function0(x);
 if(x ==1)return generic_function1(x);
+if(x ==2)return generic_function2(x);
 }
 
 
@@ -83,7 +111,11 @@ estrutura0->soma=soma;
 
 estrutura0->b=b;
 
-estrutura0->ricardo_milos=ricardo_milos;
+estrutura0->r2=r2;
+
+CLUSTER_Start(0, CORE_NUMBER);
+
+estrutura0=L1_Malloc(CORE_NUMBER*sizeof(L1_structure0));
 
 int i;
 
@@ -93,9 +125,37 @@ estrutura0->nada = nada;
 
 CLUSTER_SendTask(0, Master_Entry, (void *)1, 0);
 CLUSTER_Wait(0);
-L1_Free(estrutura1, CORE_NUMBER*sizeof(L1_structure0));
+L1_Free(estrutura2, CORE_NUMBER*sizeof(L1_structure0));
 CLUSTER_Stop(0);
 soma=estrutura0->soma;
+
+estrutura1->soma=soma;
+
+estrutura1->a=a;
+
+estrutura1->c=c;
+
+estrutura1->soma=soma;
+
+estrutura1->b=b;
+
+estrutura1->r=r;
+
+CLUSTER_Start(0, CORE_NUMBER);
+
+estrutura1=L1_Malloc(CORE_NUMBER*sizeof(L1_structure1));
+
+int i;
+
+estrutura1->i= i;
+
+estrutura1->nada = nada;
+
+CLUSTER_SendTask(0, Master_Entry, (void *)2, 0);
+CLUSTER_Wait(0);
+L1_Free(estrutura2, CORE_NUMBER*sizeof(L1_structure1));
+CLUSTER_Stop(0);
+soma=estrutura1->soma;
 
 function();
     //teste na main

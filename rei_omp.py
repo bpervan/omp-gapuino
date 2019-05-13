@@ -48,8 +48,14 @@ flag_red=0
 
 
 
-
-
+##############################################################################
+#               _       __              _ _ _                    _           #
+# ___  ___  ___| | __  / _| ___  _ __  | (_) |__  _ __ __ _ _ __(_) ___  ___ #
+#/ __|/ _ \/ _ \ |/ / | |_ / _ \| '__| | | | '_ \| '__/ _` | '__| |/ _ \/ __|#
+#\__ \  __/  __/   <  |  _| (_) | |    | | | |_) | | | (_| | |  | |  __/\__ \#
+#|___/\___|\___|_|\_\ |_|  \___/|_|    |_|_|_.__/|_|  \__,_|_|  |_|\___||___/#
+#                                                                            #
+##############################################################################
 for linha in arq1:
     linha=linha.rstrip()
     if re.search("<stdio>", linha):
@@ -59,7 +65,28 @@ for linha in arq1:
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
         continue
-    
+#######################################################################
+#                           _       __                                # 
+#             ___  ___  ___| | __  / _| ___  _ __                     #
+#            / __|/ _ \/ _ \ |/ / | |_ / _ \| '__|                    #
+#            \__ \  __/  __/   <  |  _| (_) | |                       #
+#            |___/\___|\___|_|\_\ |_|  \___/|_|                       #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                             _ _      _                              #
+#       _ __   __ _ _ __ __ _| | | ___| |  _______  _ __   ___  ___   #
+#      | '_ \ / _` | '__/ _` | | |/ _ \ | |_  / _ \| '_ \ / _ \/ __|  #
+#      | |_) | (_| | | | (_| | | |  __/ |  / / (_) | | | |  __/\__ \  #
+#      | .__/ \__,_|_|  \__,_|_|_|\___|_| /___\___/|_| |_|\___||___/  #
+#      |_|                                                            #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#######################################################################
+
 
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
 
@@ -105,14 +132,22 @@ for linha in arq1:
                    # structures[count_parallelfor].append("int "+str(prov_vars[vari])+";\n")
                     texto.append("estrutura"+str(count_parallelfor)+"->"+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
                 structures.append(prov_struct)
-                arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-                arq2.write("estrutura"+str(count_parallelfor)+"=L1_Malloc(CORE_NUMBER*sizeof(L1_structure"+str(count_parallelfor)+"));\n");
+                texto.append("CLUSTER_Start(0, CORE_NUMBER);\n")
+                texto.append("estrutura"+str(count_parallelfor)+"=L1_Malloc(CORE_NUMBER*sizeof(L1_structure"+str(count_parallelfor)+"));\n");
               # texto.append("L1_structure->"+str(prov_var[vari])+"="+str(prov_var[vari])+";\n")
 #                print(structures)
 #                print("debug aqui esse codigo\n")
                 flagpf=1
                 continue
 
+#############################################################
+#                                               _ _      _  #
+#  ___  _ __ ___  _ __    _ __   __ _ _ __ __ _| | | ___| | #
+# / _ \| '_ ` _ \| '_ \  | '_ \ / _` | '__/ _` | | |/ _ \ | #
+#| (_) | | | | | | |_) | | |_) | (_| | | | (_| | | |  __/ | #
+# \___/|_| |_| |_| .__/  | .__/ \__,_|_|  \__,_|_|_|\___|_| #
+#                |_|     |_|                                #
+#############################################################
 
 
     if flagomp: #to dentro de um pragma?
@@ -146,9 +181,15 @@ for linha in arq1:
                         func = []
     #                    print("sai da zona paralela com chaves")
 
-
-
-
+##############################################################################
+#                                               _ _      _    __             #
+#  ___  _ __ ___  _ __    _ __   __ _ _ __ __ _| | | ___| |  / _| ___  _ __  #
+# / _ \| '_ ` _ \| '_ \  | '_ \ / _` | '__/ _` | | |/ _ \ | | |_ / _ \| '__| #
+#| (_) | | | | | | |_) | | |_) | (_| | | | (_| | | |  __/ | |  _| (_) | |    #
+# \___/|_| |_| |_| .__/  | .__/ \__,_|_|  \__,_|_|_|\___|_| |_|  \___/|_|    #
+#                |_|     |_|                                                 #
+#                                                                            # 
+##############################################################################
 
     elif flagpf==1:
 
@@ -301,6 +342,31 @@ for linha in arq1:
 #lets define the generic functions to be called
 
 
+
+#####################################
+#               _ _   _             #  
+#__      ___ __(_) |_(_)_ __   __ _ # 
+#\ \ /\ / / '__| | __| | '_ \ / _` |# 
+# \ V  V /| |  | | |_| | | | | (_| |# 
+#  \_/\_/ |_|  |_|\__|_|_| |_|\__, |#  
+#                             |___/ #  
+#                                   #  
+# _ __   _____      __              #    
+#| '_ \ / _ \ \ /\ / /              #
+#| | | |  __/\ V  V /               #  
+#|_| |_|\___| \_/\_/                #    
+#                                   #   
+#                _     _            # 
+#  __ _ _ __ ___| |__ (_)_   _____  # 
+# / _` | '__/ __| '_ \| \ \ / / _ \ # 
+#| (_| | | | (__| | | | |\ V /  __/ # 
+# \__,_|_|  \___|_| |_|_| \_/ \___| # 
+#                                   # 
+#####################################
+
+
+
+
 for linha in library:
     arq2.write(linha+"\n")
 len_structures = len(structures)
@@ -308,9 +374,11 @@ print(str(len_structures)+" é a quantidade de estruturas")
 print(structures)
 for cont2 in range(len_structures):
     arq2.write("typedef struct L1_structure"+str(cont2)+"{\n")
+    structures[cont2].append("int IDstructure;\n")
     arq2.writelines(structures[cont2])
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+"* estrutura"+str(cont2)+";\n")
+    arq2.write("estrutura"+str(cont2)+"->ID_structure="+str(cont2)+";\n")
 ######################################################
 #lembre de alocar os structs e de liberar depois
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas

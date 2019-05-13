@@ -12,7 +12,7 @@ int main()
 {
     int soma=0,a,b=10,c=2,ricardo_milos = 30;
     int nada = 2000;
-#pragma omp parallel for default(none) private(b,ricardo_milos) shared(a,c) reduction(+:soma)
+#pragma omp parallel for default(none) private(b,r2) shared(a,c) reduction(+:soma)
 for (int i = 0 ; i < nada; i++  )
 {
     a+=b+i;
@@ -22,6 +22,11 @@ for (int i = 0 ; i < nada; i++  )
     }
     printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),a);
     soma+=b+c;
+}
+#pragma omp parallel for default(none) private(b,r) shared(a,c) reduction(+:soma)
+for (int i = 0 ; i < nada; i++  )
+{
+    a+=1;
 }
 function();
     //teste na main
