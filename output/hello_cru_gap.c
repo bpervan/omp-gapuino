@@ -19,7 +19,7 @@ int i;
 int IDstructure;
 }L1_structure0;
 L1_structure0* estrutura0;
-estrutura0->ID_structure=0;
+estrutura0->IDstructure=0;
 typedef struct L1_structure1{
 int a;
 int c;
@@ -31,7 +31,7 @@ int i;
 int IDstructure;
 }L1_structure1;
 L1_structure1* estrutura1;
-estrutura1->ID_structure=1;
+estrutura1->IDstructure=1;
 void generic_function0(void* gen_var0){
 
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
@@ -79,9 +79,9 @@ EU_MutexUnlock(0);
 }
 void caller(void* arg){
 int x = (L1_structure2)arg;
-if(x ==0)return generic_function0(x);
-if(x ==1)return generic_function1(x);
-if(x ==2)return generic_function2(x);
+if(x->IDstructure ==0)return generic_function0(x);
+if(x->IDstructure ==1)return generic_function1(x);
+if(x->IDstructure ==2)return generic_function2(x);
 }
 
 
