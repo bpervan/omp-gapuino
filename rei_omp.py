@@ -378,7 +378,7 @@ for cont2 in range(len_structures):
     arq2.writelines(structures[cont2])
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+"* estrutura"+str(cont2)+";\n")
-    arq2.write("estrutura"+str(cont2)+"->ID_structure="+str(cont2)+";\n")
+    arq2.write("estrutura"+str(cont2)+"->IDstructure="+str(cont2)+";\n")
 ######################################################
 #lembre de alocar os structs e de liberar depois
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
@@ -390,9 +390,9 @@ for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("\n}\n")
 
 arq2.write("void caller(void* arg){\n")
-arq2.write("int x = (L1_structure"+str(count_parallelfor)+")arg;\n")
+arq2.write("int x = (L1_structure"+str(cont2)+")arg;\n")
 for cont2 in range (contador):
-        arq2.write("if(x =="+str(cont2)+")return generic_function"+str(cont2)+"(x);\n")
+        arq2.write("if(x->IDstructure =="+str(cont2)+")return generic_function"+str(cont2)+"(x);\n")
 arq2.write("}\n")
 arq2.write("\n\n")
 arq2.write("void Master_Entry(void *arg) {\n")
