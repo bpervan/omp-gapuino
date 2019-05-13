@@ -1,0 +1,51 @@
+#             pragma omp parallel for  default(none) private(a) shared(b,c)
+#             pragma omp parallel for  default(none) private(a) shared(b,c) E ELA QUE AGENTE QUER
+
+achei parallel for de numero: 1
+
+use default(none) directive to parallel for
+void function(){
+int soma;
+soma = 10;
+
+parallel_function0(0)
+
+}
+
+int main()
+{
+    int a,b=10,c=2;
+
+parallelfor_function1(0)
+
+
+printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
+use default(none) directive to parallel for
+void function(){
+int soma;
+soma = 10;
+
+parallel_function0(0)
+
+}
+
+int main()
+{
+    int a,b=10,c=2;
+
+printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
+#pragma omp parallel for default(none) private(a) shared(b,c)
+use default(none) directive to parallel for
+void function(){
+int soma;
+soma = 10;
+
+parallel_function0(0)
+
+}
+
+int main()
+{
+    int a,b=10,c=2;
+
+printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
