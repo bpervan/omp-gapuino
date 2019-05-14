@@ -1,6 +1,6 @@
 # User Test
 #------------------------------------------
-TEST_C          = ./test_Cluster_HelloWorld.c
+TEST_C          = ./test_st.c
 
 # For RTOS Jenkins test, it will never finished so add a jenkins test Flag to exit().
 MBED_FLAGS     +=-DJENKINS_TEST_FLAG=1
