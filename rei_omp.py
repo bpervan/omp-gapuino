@@ -124,7 +124,7 @@ for linha in arq1:
                     reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
                     red_oper = reduct[0]
                     red_var = reduct[1]
-                    texto.append("estrutura"+str(count_parallelfor)+'->'+red_var+"="+red_var+";\n")
+                 #   texto.append("estrutura"+str(count_parallelfor)+'->'+red_var+"="+red_var+";\n")
                     flag_red = 1
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
@@ -267,8 +267,15 @@ for linha in arq1:
         elif flagchave:#estamos dentro de um for paralelo
                 
                 
-                func.append("\n"+linha+"\n")
-            
+                rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+                rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                print(rs.findall(linha))
+                if rs.findall(linha) !=[]:
+                    func.append("EU_MutexLock(0);\n")
+                    func.append("\n"+linha+"\n")
+                    func.append("EU_MutexUnlock(0);\n")
+                else:
+                    func.append("\n"+linha+"\n")
                 
                 
                 if(flagchave2==0 and re.search("}",linha)):
@@ -277,8 +284,6 @@ for linha in arq1:
                         flagpf = 0
                         contador = contador +1
                         print(prov_vars_shared)
-                        rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                        rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                         func2=[]
                         
                         
@@ -299,6 +304,7 @@ for linha in arq1:
                             structu="estrutura"+str(count_parallelfor)+"->"
                             if re.search("\"",prov_line):
                                 prov2_line = prov_line.split("\"")
+
                                 prov3_line = ''.join(rs.sub("estrutura"+str(count_parallelfor)+'->'+r'\1',prov_line)).split("\"")
                                 func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
                                 continue
@@ -405,7 +411,6 @@ for linha in texto:
     elif re.search("parallelfor_function",linha):
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
         arq2.write("CLUSTER_Wait(0);\n")
-        for vari in
         arq2.write("free(estrutura"+str(count_parallelfor-count2pf)+");\n");
         cont_paral = cont_paral - 1
         count2pf = count2pf-1

@@ -15,6 +15,7 @@ int c;
 int soma;
 int b;
 int r;
+int soma;
 int nada;
 }L1_structure0;
 L1_structure0* estrutura0;
@@ -24,6 +25,7 @@ int c;
 int soma;
 int b;
 int r;
+int soma;
 int nada;
 }L1_structure1;
 L1_structure1* estrutura1;
@@ -34,23 +36,30 @@ printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 void generic_function1(void* gen_var1){
 L1_structure0* L1_structure = malloc(sizeof(L1_structure0));
 L1_structure = estrutura0;
-printf("\n%d\n",L1_structure->a);
 int new_n = (L1_structure->nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure->nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
+EU_MutexLock(0);
 
     estrutura0->a+=L1_structure->b+i;
+EU_MutexUnlock(0);
 if(omp_get_thread_num()==0)
 
     {
+EU_MutexLock(0);
 
         estrutura0->c+=estrutura0->a;
+EU_MutexUnlock(0);
 
     }
+EU_MutexLock(0);
 
-//    printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura0->a);
+    printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura0->a);
+EU_MutexUnlock(0);
+EU_MutexLock(0);
 
-    estrutura0->soma+=L1_structure->b+estrutura0->c;
+    L1_structure->estrutura0->soma+=L1_structure->b+estrutura0->c;
+EU_MutexUnlock(0);
 
 }
 EU_MutexLock(0);
@@ -62,14 +71,17 @@ EU_MutexUnlock(0);
 void generic_function2(void* gen_var2){
 L1_structure1* L1_structure = malloc(sizeof(L1_structure1));
 L1_structure = estrutura1;
-printf("\n%d\n",L1_structure->a);
 int new_n = (L1_structure->nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 for(int i= 0+(L1_structure->nada/CORE_NUMBER)*omp_get_thread_num(); i<new_n;i++)
 {
+EU_MutexLock(0);
 
     estrutura1->a+=1;
+EU_MutexUnlock(0);
+EU_MutexLock(0);
 
-    estrutura1->soma*=2;
+    L1_structure->estrutura1->soma*=2;
+EU_MutexUnlock(0);
 
 }
 EU_MutexLock(0);
@@ -100,12 +112,9 @@ CLUSTER_Stop(0);
 
 int main()
 {
-    int soma=0,a=1,b=10,c=2,r = 30;
+    int soma=0,a,b=10,c=2,r = 30;
     int nada = 2000;
-//    function();
-estrutura0->soma=soma;
 estrutura0->a=a;
-printf("teste1 \n%d\n",estrutura0->a);
 
 estrutura0->c=c;
 
@@ -114,6 +123,8 @@ estrutura0->soma=soma;
 estrutura0->b=b;
 
 estrutura0->r=r;
+
+estrutura0->soma=soma;
 
 CLUSTER_Start(0, CORE_NUMBER);
 
@@ -127,8 +138,6 @@ free(estrutura0);
 CLUSTER_Stop(0);
 soma=estrutura0->soma;
 
-estrutura1->soma=soma;
-
 estrutura1->a=a;
 
 estrutura1->c=c;
@@ -138,6 +147,8 @@ estrutura1->soma=soma;
 estrutura1->b=b;
 
 estrutura1->r=r;
+
+estrutura1->soma=soma;
 
 CLUSTER_Start(0, CORE_NUMBER);
 
