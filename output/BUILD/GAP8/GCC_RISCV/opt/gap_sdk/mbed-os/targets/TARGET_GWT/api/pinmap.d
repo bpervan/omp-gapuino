@@ -3,6 +3,7 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/mbed_config.h \
  /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
  /opt/gap_sdk/mbed-os/platform/mbed_preprocessor.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/hal/pinmap.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/pins/PinNames.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/device/cmsis.h \

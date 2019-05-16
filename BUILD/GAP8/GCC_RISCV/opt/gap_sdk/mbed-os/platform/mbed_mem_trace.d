@@ -6,10 +6,10 @@
  /opt/gap_sdk/mbed-os/platform/SingletonPtr.h \
  /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
  /opt/gap_sdk/mbed-os/platform/mbed_preprocessor.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx5/Include/cmsis_os2.h \
  /opt/gap_sdk/mbed-os/platform/PlatformMutex.h \
  /opt/gap_sdk/mbed-os/platform/NonCopyable.h \
- /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/platform/mbed_debug.h \
  /opt/gap_sdk/mbed-os/rtos/Mutex.h \
  /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/mbed_rtos1_types.h \

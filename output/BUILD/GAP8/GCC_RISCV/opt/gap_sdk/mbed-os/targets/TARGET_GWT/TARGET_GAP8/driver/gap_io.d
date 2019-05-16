@@ -28,7 +28,6 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_pmu.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_fll.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_regulator.h \
- /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_debug.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_uart.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_hyperbus.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_spi.h \
@@ -40,9 +39,11 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_performance.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_cpi.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/pins/PinNames.h \
- /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_memcpy.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_dmacpy.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_fc_malloc.h \
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_malloc.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_debug.h \
+ /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/driver/gap_bridge.h \
  /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/rtx5/RTX/Source/rtx_core_c.h \
  /opt/gap_sdk/mbed-os/cmsis/RTE_Components.h \
  /opt/gap_sdk/mbed-os/rtos/TARGET_RISCV/mbed_rtx_conf.h \

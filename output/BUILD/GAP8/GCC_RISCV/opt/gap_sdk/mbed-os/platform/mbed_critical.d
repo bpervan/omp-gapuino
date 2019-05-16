@@ -17,5 +17,6 @@
  /opt/gap_sdk/mbed-os/targets/TARGET_GWT/TARGET_GAP8/device/cmsis_nvic.h \
  /opt/gap_sdk/mbed-os/platform/mbed_assert.h \
  /opt/gap_sdk/mbed-os/platform/mbed_preprocessor.h \
+ /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h \
  /opt/gap_sdk/mbed-os/platform/mbed_critical.h \
  /opt/gap_sdk/mbed-os/platform/mbed_toolchain.h

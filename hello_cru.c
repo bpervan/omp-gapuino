@@ -23,9 +23,10 @@ for (int i = 0 ; i < nada; i++  )
     printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),a);
     soma+=b+c;
 }
-#pragma omp parallel for default(none) private(b,r,soma) shared(a,c) reduction(*:soma)
+#pragma omp parallel for default(none) private(b,r,soma,w) shared(a,c) reduction(*:soma)
 for (int j = 0 ; i < nada; i++  )
 {
+    int w
     a+=1;
     soma*=2;
 }
