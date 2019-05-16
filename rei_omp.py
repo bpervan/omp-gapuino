@@ -56,7 +56,9 @@ prov_vars_shared = ""
 red_oper=""
 red_var=""
 flag_red=0
-
+flagchave3=0
+flagchave4=0
+flagvars=0
 
 
 ##############################################################################
@@ -102,7 +104,8 @@ for linha in arq1:
 
 
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
-        
+        contador = contador+1
+        texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
         if re.search(r"private|shared",linha):
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
@@ -113,13 +116,14 @@ for linha in arq1:
                 for vari in range(var_len):
                     prov_struct.append("int "+str(prov_vars[vari])+";\n")
                     lista_var_pf.append(vari)
-                    texto.append("estrutura"+str(contador)+"->"+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+                    texto.append("estrutura"+str(contador-1)+"->"+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
                 structures.append(prov_struct)
+                flagvars=1
         else:
             structures.append(["int ignore;\n"])
 
         flagomp = 1
-        texto.append("parallel_function"+str(contador)+"(0)\n")
+        texto.append("parallel_function"+str(contador-1)+"(0)\n")
         func.append("int x_flagsingle_x=0;\n")
         continue
 
@@ -128,6 +132,7 @@ for linha in arq1:
 
     elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
         
+        contador = contador+1
         
         if not re.search("default",linha):
                 print(linha)
@@ -137,6 +142,7 @@ for linha in arq1:
                 prov_struct = []
 
                 func.append("int x_flagsingle_x=0;\n")
+                texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
 
                ##############################################################
         #######verivy if have a reduction clause and identify the variable #########
@@ -155,7 +161,7 @@ for linha in arq1:
                 for vari in range(var_len):
                     prov_struct.append("int "+str(prov_vars[vari])+";\n")
                     lista_var_pf.append(vari)
-                    texto.append("estrutura"+str(contador)+"->"+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+                    texto.append("estrutura"+str(contador-1)+"->"+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
                # print(prov_struct)
                 structures.append(prov_struct)
                 flagpf=1
@@ -182,25 +188,66 @@ for linha in arq1:
             continue
         if(re.search("{",linha)and flagchave == 0):
             flagchave = 1
-
+            continue
         elif not flagchave:#a zona paralela é só a próxima linha
             flagomp = 0
-            contador = contador +1
+            
             func.append("\n"+linha)
             functions.append(func)
             func = []
         elif flagchave:#estamos dentro de uma zona paralela
-                func.append(linha+"\n")
-                if re.search("{",linha):#tem chaves internas
-                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
-                elif re.search("}",linha):
-                        flagchave2=flagchave2-linha.count("}")
-                elif(flagchave2==0 and re.search("}",linha)):
-                        flagchave=0
-                        flagomp = 0
-                        contador = contador +1
-                        functions.append(func)
-                        func = []
+            func.append(linha+"\n")
+            if re.search("{",linha):#tem chaves internas
+                    flagchave2=flagchave2+linha.count("{")-linha.count("}")
+            elif re.search("}",linha):
+                    flagchave2=flagchave2-linha.count("}")
+            elif(flagchave2==0 and re.search("}",linha)):
+                if flagvars:
+                    for prov_line in func:
+                        if re.search("\"",prov_line):
+                            prov2_line = prov_line.split("\"")
+                            prov3_line = ''.join(rp.sub(r"L1_structure->\1",prov_line)).split("\"")
+                            func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                            continue
+                        func2.append(''.join(rp.sub(r"L1_structure->\1",prov_line)))
+                    func3=[]
+                    
+                    
+                    
+                    
+                    for prov_line in func2:
+                        structu="estrutura"+str(contador-1)+"->"
+                        if re.search("\"",prov_line):
+                            prov2_line = prov_line.split("\"")
+
+                            prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'->'+r'\1',prov_line)).split("\"")
+                            func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                            continue
+                        func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'->'+r'\1',prov_line)))
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    if flag_red:
+                        func3.append("EU_MutexLock(0);\n")
+                        func3.append("\nestrutura"+str(contador-1)+"->"+red_var+"=estrutura"+str(contador-1)+"->"+red_var+red_oper+"L1_structure->"+red_var+";\n")
+                        func3.append("EU_MutexUnlock(0);\n")
+                        texto.append(red_var+"=estrutura"+str(contador-1)+"->"+red_var+";\n")
+#                        texto.append("free(estrutura"+str(contador)+");\n");
+                        functions.append(func3)
+                        func2 = []
+                        prov_vars_shared = []
+                        prov_vars_private = []
+                        prov_vars = []
+                flagchave=0
+                flagomp = 0
+                functions.append(func)
+                func = []
+
         
     if flagomp==2:
    
@@ -242,17 +289,16 @@ for linha in arq1:
            ######appending the new for function parallel#########
                 #########################################
 
-            func.append("L1_structure"+str(contador)+"* L1_structure = malloc(sizeof(L1_structure"+str(contador)+"));\n")
-            func.append("L1_structure = estrutura"+str(contador)+";\n")
+            func.append("L1_structure"+str(contador-1)+"* L1_structure = malloc(sizeof(L1_structure"+str(contador-1)+"));\n")
+            func.append("L1_structure = estrutura"+str(contador-1)+";\n")
             func.append("int new_n = (L1_structure->"+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
             if re.search("int",for_iter):
                 #texto.append("int "+i+";\n" )
                 func.append("for(int "+i+"= "+str(starter)+"+(L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); "+i+operator+"new_n;"+modifier+")\n{\n")
             else:
-                func.append("for(L1_structure"+str(contador)+"->"+i+"="+str(starter)+"+ (L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); L1_structure"+str(contador)+"->"+i+operator+"new_n;"+modifier+")\n{\n")
-            ##texto.append("estrutura"+str(contador)+"->"+i+"= "+i+";\n")
-            texto.append("estrutura"+str(contador)+"->"+str(n)+" = "+str(n)+";\n")
-            texto.append("estrutura"+str(contador)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador)+"));\n")
+                func.append("for(L1_structure"+str(contador-1)+"->"+i+"="+str(starter)+"+ (L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); L1_structure"+str(contador-1)+"->"+i+operator+"new_n;"+modifier+")\n{\n")
+            ##texto.append("estrutura"+str(contador-1)+"->"+i+"= "+i+";\n")
+            texto.append("estrutura"+str(contador-1)+"->"+str(n)+" = "+str(n)+";\n")
     #need no more append the for limmits
             structures[contador-1].append("int "+str(n)+";\n")
             flagomp=1
@@ -308,20 +354,20 @@ for linha in arq1:
             #########################################
        ######appending the new for function parallel#########
             #########################################
-        func.append("L1_structure"+str(contador)+"* L1_structure = malloc(sizeof(L1_structure"+str(contador)+"));\n")
-        func.append("L1_structure = estrutura"+str(contador)+";\n")
+        func.append("L1_structure"+str(contador-1)+"* L1_structure = malloc(sizeof(L1_structure"+str(contador-1)+"));\n")
+        func.append("L1_structure = estrutura"+str(contador-1)+";\n")
         func.append("int new_n = (L1_structure->"+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
         if re.search("int",for_iter):
             #texto.append("int "+i+";\n" )
             func.append("for(int "+i+"= "+str(starter)+"+(L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); "+i+operator+"new_n;"+modifier+")\n{\n")
         else:
-            func.append("for(L1_structure"+str(contador)+"->"+i+"="+str(starter)+"+ (L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); L1_structure"+str(contador)+"->"+i+operator+"new_n;"+modifier+")\n{\n")
-        ##texto.append("estrutura"+str(contador)+"->"+i+"= "+i+";\n")
-        texto.append("estrutura"+str(contador)+"->"+str(n)+" = "+str(n)+";\n")
-        texto.append("estrutura"+str(contador)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador)+"));\n")
-        texto.append("\nparallelfor_function"+str(contador)+"(0)\n")
+            func.append("for(L1_structure"+str(contador-1)+"->"+i+"="+str(starter)+"+ (L1_structure->"+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); L1_structure"+str(contador-1)+"->"+i+operator+"new_n;"+modifier+")\n{\n")
+        ##texto.append("estrutura"+str(contador-1)+"->"+i+"= "+i+";\n")
+        texto.append("estrutura"+str(contador-1)+"->"+str(n)+" = "+str(n)+";\n")
+        texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
+        texto.append("\nparallelfor_function"+str(contador-1)+"(0)\n")
 #need no more append the for limmits
-        print(contador)
+        print(contador-1)
         print(len(structures))
         structures[contador-1].append("int "+str(n)+";\n")
        # structures[contador].append("int "+str(i)+";\n")
@@ -336,13 +382,14 @@ for linha in arq1:
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
             func.append("if(++x_flagsingle_x==1)\n")
             continue
-        if(re.search("{",linha)and flagchave == 0):
-            flagchave = 1
+        if(re.search("{",linha)and flagchave3 == 0):
+            
+            flagchave3 = 1
             continue
-        elif not flagchave:#o for é só a próxima linha
+        elif not flagchave3:#o for é só a próxima linha
             #replacing shared variables with actual structure
             flagpf = 0
-            contador = contador +1
+
             func.append("\n"+linha+"\n")
             func.append("\n}\n")
             functions.append(func)
@@ -351,11 +398,11 @@ for linha in arq1:
 
 
 
-        elif flagchave:#estamos dentro de um for paralelo
+        elif flagchave3:#estamos dentro de um for paralelo
                 
                 
                 rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                rs = re.compile(r'\b({})\b'.format('|='.join(prov_vars_shared)))
                 print(rs.findall(linha))
                 if rs.findall(linha) !=[]:
                     func.append("EU_MutexLock(0);\n")
@@ -365,11 +412,11 @@ for linha in arq1:
                     func.append("\n"+linha+"\n")
                 
                 
-                if(flagchave2==0 and re.search("}",linha)):
+                if(flagchave4==0 and re.search("}",linha)):
 
-                        flagchave=0
+                        rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                        flagchave3=0
                         flagpf = 0
-                        contador = contador +1
                         print(prov_vars_shared)
                         func2=[]
                         
@@ -388,14 +435,14 @@ for linha in arq1:
                         
                         
                         for prov_line in func2:
-                            structu="estrutura"+str(contador)+"->"
+                            structu="estrutura"+str(contador-1)+"->"
                             if re.search("\"",prov_line):
                                 prov2_line = prov_line.split("\"")
 
-                                prov3_line = ''.join(rs.sub("estrutura"+str(contador)+'->'+r'\1',prov_line)).split("\"")
+                                prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'->'+r'\1',prov_line)).split("\"")
                                 func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
                                 continue
-                            func3.append(''.join(rs.sub("estrutura"+str(contador)+'->'+r'\1',prov_line)))
+                            func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'->'+r'\1',prov_line)))
                         
                         
                         
@@ -406,9 +453,10 @@ for linha in arq1:
                         
                         if flag_red:
                             func3.append("EU_MutexLock(0);\n")
-                            func3.append("\nestrutura"+str(contador)+"->"+red_var+"=estrutura"+str(contador)+"->"+red_var+red_oper+"L1_structure->"+red_var+";\n")
+                            
+                            func3.append("\nestrutura"+str(contador-1)+"->"+red_var+"=estrutura"+str(contador-1)+"->"+red_var+red_oper+"L1_structure->"+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
-                            texto.append(red_var+"=estrutura"+str(contador)+"->"+red_var+";\n")
+                            texto.append(red_var+"=estrutura"+str(contador-1)+"->"+red_var+";\n")
 #                            texto.append("free(estrutura"+str(contador)+");\n");
                         functions.append(func3)
                         func = []
@@ -416,11 +464,10 @@ for linha in arq1:
                         prov_vars_shared = []
                         prov_vars_private = []
                         prov_vars = []
-                        contador = contador+1
                 elif re.search("{",linha):#tem chaves internas
-                        flagchave2=flagchave2+linha.count("{")-linha.count("}")
+                        flagchave4=flagchave4+linha.count("{")-linha.count("}")
                 elif re.search("}",linha):
-                        flagchave2=flagchave2-linha.count("}")
+                        flagchave4=flagchave4-linha.count("}")
 
 
 
@@ -471,6 +518,8 @@ for cont2 in range(len_structures):
     #arq2.write("estrutura"+str(cont2)+"->IDstructure="+str(cont2)+";\n")
 ######################################################
 #lembre de alocar os structs e de liberar depois
+
+print(contador-1)
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     #print("buga em: "+str(cont2)+"\n")
@@ -481,26 +530,26 @@ for cont2 in range (contador):#escreve as funcoes das zonas paralelas
 arq2.write("void caller(void* arg){\n")
 arq2.write("int x = (int)arg;\n")
 for cont2 in range (contador):
-    arq2.write("if(x =="+str(cont2)+")return generic_function"+str(cont2)+"(x);\n")
+    arq2.write("if(x =="+str(cont2)+")return generic_function"+str(cont2)+"((void*)x);\n")
 arq2.write("}\n")
 arq2.write("\n\n")
 arq2.write("void Master_Entry(void *arg) {\n")
 arq2.write("    CLUSTER_CoresFork(caller, arg);\n")
 arq2.write("}\n")
 
-count2pf = contador
-cont_paral = contador
+count2pf = contador-1
+cont_paral = contador-1
 for linha in texto:
     #ligando e desligando o cluster
     if re.search("parallel_function",linha):
         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
+        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador-1- cont_paral)+", 0);\n")
         cont_paral = cont_paral - 1
         arq2.write("CLUSTER_Wait(0);\n")
         arq2.write("CLUSTER_Stop(0);\n")
     elif re.search("parallelfor_function",linha):
         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
-        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador- cont_paral)+", 0);\n")
+        arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador-1- cont_paral)+", 0);\n")
         arq2.write("CLUSTER_Wait(0);\n")
         cont_paral = cont_paral - 1
         count2pf = count2pf-1
