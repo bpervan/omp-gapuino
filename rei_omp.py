@@ -59,8 +59,9 @@ flag_red=0
 flagchave3=0
 flagchave4=0
 flagvars=0
+flagcrit=0
 
-
+flagcrit2=0
 ##############################################################################
 #               _       __              _ _ _                    _           #
 # ___  ___  ___| | __  / _| ___  _ __  | (_) |__  _ __ __ _ _ __(_) ___  ___ #
@@ -101,7 +102,6 @@ for linha in arq1:
 #                                                                     #
 #                                                                     #
 #######################################################################
-
 
     if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
         contador = contador+1
@@ -179,6 +179,39 @@ for linha in arq1:
 
     if flagomp==1: #to dentro de um pragma?
         
+##########################
+#seek for pragma critical#
+##########################
+        if re.search("pragma",linha) and re.search("omp",linha)and (re.search("critical",linha) or re.search("atomic",linha)): 
+            flagcrit=1
+            func.append("EU_MutexLock(0);\n")
+            flagcrit2=0
+            continue
+        if flagcrit==1:
+            if linha=="":
+                func.append(linha)
+                continue
+            elif not re.search("{",linha):
+                func.append(linha)
+                func.append("\nEU_MutexUnlock(0);\n")
+                flagcrit=0
+                continue
+            else:
+                func.append(linha)
+                flagcrit2=1
+                flagcrit=2
+                continue
+        elif flagcrit==2:
+            func.append(linha)
+            if re.search("{",linha):#tem chaves internas
+                    flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+            elif re.search("}",linha):
+                    flagcrit2=flagcrit2-linha.count("}")
+            elif(flagcrit2==0 and re.search("}",linha)):
+                func.append("\nEU_MutexUnlock(0);\n")
+                flagcrit=0
+            continue
+
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
             func.append("if(omp_get_thread_num()==0)\n")
 
@@ -379,6 +412,36 @@ for linha in arq1:
 
     elif flagpf==2:
 
+        if re.search("pragma",linha) and re.search("omp",linha)and (re.search("critical",linha) or re.search("atomic",linha)): 
+            flagcrit=1
+            func.append("EU_MutexLock(0);\n")
+            flagcrit2=0
+            continue
+        if flagcrit==1:
+            if linha=="":
+                func.append(linha)
+                continue
+            elif not re.search("{",linha):
+                func.append(linha)
+                func.append("\nEU_MutexUnlock(0);\n")
+                flagcrit=0
+                continue
+            else:
+                func.append(linha)
+                flagcrit2=1
+                flagcrit=2
+                continue
+        elif flagcrit==2:
+            func.append(linha)
+            if re.search("{",linha):#tem chaves internas
+                    flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+            elif re.search("}",linha):
+                    flagcrit2=flagcrit2-linha.count("}")
+            elif(flagcrit2==0 and re.search("}",linha)):
+                func.append("\nEU_MutexUnlock(0);\n")
+                flagcrit=0
+            continue
+
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
             func.append("if(++x_flagsingle_x==1)\n")
             continue
@@ -522,6 +585,7 @@ for cont2 in range(len_structures):
 print(contador-1)
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
+    arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
     #print("buga em: "+str(cont2)+"\n")
     arq2.writelines(functions[cont2])
     #print(functions[cont2])

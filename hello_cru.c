@@ -10,8 +10,9 @@ printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 
 int main()
 {
-    int soma=0,a,w=5,b=10,c=2,r = 30;
+    int soma=0,a=10,w=5,b=10,c=2,r = 30;
     int nada = 2000;
+    function();
 #pragma omp parallel for default(none) private(b,r,soma) shared(a,c) reduction(+:soma)
 for (int i = 0 ; i < nada; i++  )
 {
@@ -27,6 +28,7 @@ for (int i = 0 ; i < nada; i++  )
 for (int j = 0 ; i < nada; i++  )
 {
     a+=1;
+#pragma omp critical
     soma*=2;
 }
 function();
