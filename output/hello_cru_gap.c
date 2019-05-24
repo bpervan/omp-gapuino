@@ -33,44 +33,38 @@ int nada;
 }L1_structure2;
 L1_structure2 estrutura2;
 void generic_function0(void* gen_var0){
-//printf("\ngeneric function 0\n");
 int x_flagsingle_x=0;
 
 printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 }
 void generic_function1(void* gen_var1){
-//printf("\ngeneric function 1\n");
-
 int x_flagsingle_x=0;
 L1_structure1 L1_structure;
 L1_structure = estrutura1;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
-
-printf("olokinho meu1\n");
 for(i;i<new_n; i++)
 {
-EU_MutexLock(0);
 
     estrutura1.a+=L1_structure.b+i;
-EU_MutexUnlock(0);
 if(++x_flagsingle_x==1)
 
     {
-EU_MutexLock(0);
+
+        printf("%d\n",estrutura1.a);
 
         estrutura1.c+=estrutura1.a;
-EU_MutexUnlock(0);
 
     }
-EU_MutexLock(0);
 
     printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura1.a);
-EU_MutexUnlock(0);
 
     L1_structure.soma+=L1_structure.b+estrutura1.c;
 
+    printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
+
 }
+CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
 estrutura1.soma=estrutura1.soma+L1_structure.soma;
@@ -78,24 +72,23 @@ EU_MutexUnlock(0);
 
 }
 void generic_function2(void* gen_var2){
-//printf("\ngeneric function 2\n");
 int x_flagsingle_x=0;
 L1_structure2 L1_structure;
 L1_structure = estrutura2;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
-printf("olokinho meu2\n");
 for(i;i<new_n; i++)
 {
-EU_MutexLock(0);
 
     estrutura2.a+=1;
-EU_MutexUnlock(0);
 EU_MutexLock(0);
     L1_structure.soma*=2;
 EU_MutexUnlock(0);
 
+    printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
+
 }
+CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
 estrutura2.soma=estrutura2.soma*L1_structure.soma;
@@ -124,8 +117,8 @@ printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
 }
 int main()
 {
-    int soma=0,a=10,w=5,b=10,c=2,r = 30;
-    int nada = 2000;
+    int soma=10,a=10,w=5,b=10,c=2,r = 30;
+    int nada = 20;
     function();
 estrutura1.a=a;
 
@@ -143,8 +136,9 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)1, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
-soma=estrutura1.soma;
+soma=soma+estrutura1.soma;
 
+printf("o resultado da soma depois do parallel for1 e: %d\n",soma);
 estrutura2.a=a;
 
 estrutura2.c=c;
@@ -163,12 +157,11 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)2, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
-soma=estrutura2.soma;
+soma=soma*estrutura2.soma;
 
-function();
     //teste na main
     //outro teste
-printf("o resultado da soma e %d\n",soma);
+printf("o resultado da soma depois do parallel for2 e: %d\n",soma);
 exit (0);
 }
 //teste dps da main

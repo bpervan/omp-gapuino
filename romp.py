@@ -53,6 +53,7 @@ lista_var_pf=[]
 schedule = 1
 prov_vars_private = ""
 prov_vars_shared = ""
+prov_vars_shared2 = []
 red_oper=""
 red_var=""
 flag_red=0
@@ -109,6 +110,16 @@ for linha in arq1:
         if re.search(r"private|shared",linha):
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+
+                for i in prov_vars_shared:
+                    prov_vars_shared2.append(i+r"\s+?=\s+?")
+                    prov_vars_shared2.append(i+r"\s+?\+="  )
+                    prov_vars_shared2.append(i+r"\s+?-="   )
+                    prov_vars_shared2.append(i+r"\s+?\*="  )
+                    prov_vars_shared2.append(i+r"\s+?/="   )
+                    prov_vars_shared2.append(i+r"\s+?\+\+" )
+                    prov_vars_shared2.append(i+r"\s+?--")
+
                # if flag_red:
                #     prov_vars_shared.append(red_var)
                 prov_vars = prov_vars_shared+prov_vars_private
@@ -154,8 +165,15 @@ for linha in arq1:
                     flag_red = 1
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
-               # if flag_red:
-               #     prov_vars_shared.append(red_var)
+                for i in prov_vars_shared:
+                    prov_vars_shared2.append(i+r"\s+?=\s+?")
+                    prov_vars_shared2.append(i+r"\s+?\+="  )
+                    prov_vars_shared2.append(i+r"\s+?-="   )
+                    prov_vars_shared2.append(i+r"\s+?\*="  )
+                    prov_vars_shared2.append(i+r"\s+?/="   )
+                    prov_vars_shared2.append(i+r"\s+?\+\+" )
+                    prov_vars_shared2.append(i+r"\s+?--")
+
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 for vari in range(var_len):
@@ -266,10 +284,11 @@ for linha in arq1:
                     
                     
                     if flag_red:
+                        func3.append("CLUSTER_SynchBarrier();\n")
                         func3.append("EU_MutexLock(0);\n")
                         func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                         func3.append("EU_MutexUnlock(0);\n")
-                        texto.append(red_var+"=estrutura"+str(contador-1)+"."+red_var+";\n")
+                        texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
 #                        texto.append("free(estrutura"+str(contador)+");\n");
                         functions.append(func3)
                         func2 = []
@@ -470,9 +489,10 @@ for linha in arq1:
                 
                 
                 rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                rs = re.compile(r'\b({})\b'.format('|='.join(prov_vars_shared)))
-                print(rs.findall(linha))
-                if rs.findall(linha) !=[]:
+                rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
+                print(rs2.pattern)
+                if rs2.findall(linha) !=[]:
                     func.append("EU_MutexLock(0);\n")
                     func.append("\n"+linha+"\n")
                     func.append("EU_MutexUnlock(0);\n")
@@ -485,7 +505,7 @@ for linha in arq1:
                         rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                         flagchave3=0
                         flagpf = 0
-                        print(prov_vars_shared)
+                        #print(prov_vars_shared)
                         func2=[]
                         
                         
@@ -520,11 +540,12 @@ for linha in arq1:
                         
                         
                         if flag_red:
+                            func3.append("CLUSTER_SynchBarrier();\n")
                             func3.append("EU_MutexLock(0);\n")
                             
                             func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
-                            texto.append(red_var+"=estrutura"+str(contador-1)+"."+red_var+";\n")
+                            texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
 #                            texto.append("free(estrutura"+str(contador)+");\n");
                         functions.append(func3)
                         func = []
@@ -575,8 +596,8 @@ for linha in arq1:
 for linha in library:
     arq2.write(linha+"\n")
 len_structures = len(structures)
-print(str(len_structures)+" é a quantidade de estruturas")
-print(structures)
+#print(str(len_structures)+" é a quantidade de estruturas")
+#print(structures)
 for cont2 in range(len_structures):
     arq2.write("typedef struct L1_structure"+str(cont2)+"{\n")
     #structures[cont2].append("int IDstructure;\n")
@@ -590,7 +611,7 @@ for cont2 in range(len_structures):
 print(contador-1)
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
-    arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
+    #arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
     #print("buga em: "+str(cont2)+"\n")
     arq2.writelines(functions[cont2])
     #print(functions[cont2])
@@ -628,6 +649,6 @@ for linha in texto:
          arq2.write(linha+"\n")# o fim do arquivo chegou
 arq1.close()
 arq2.close()
-for line in functions:
-    print(line)
-    print("\n")
+#for line in functions:
+#    print(line)
+#    print("\n")
