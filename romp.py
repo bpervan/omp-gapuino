@@ -112,15 +112,6 @@ for linha in arq1:
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
 
-                for i in prov_vars_shared:
-                    prov_vars_shared2.append(i+"\s*=\s*")
-                    prov_vars_shared2.append(i+"\s*\+=\s*")
-                    prov_vars_shared2.append(i+"\s*-=\s*")
-                    prov_vars_shared2.append(i+"\s*\*=\s*")
-                    prov_vars_shared2.append(i+"\s*=\s*")
-                    prov_vars_shared2.append(i+"\s*\+\+\s*")
-                    prov_vars_shared2.append(i+"\s*--\s*")
-                print(prov_vars_shared2)
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 prov_struct = []
@@ -364,6 +355,7 @@ for linha in arq1:
     #need no more append the for limmits
             structures[contador-1].append("int "+str(n)+";\n")
             flagomp=1
+    
             continue
     
     
@@ -437,6 +429,8 @@ for linha in arq1:
        # print(len(structures))
         structures[contador-1].append("int "+str(n)+";\n")
        # structures[contador].append("int "+str(i)+";\n")
+        if re.search(r")\s*{",linha):
+            flagchave3=1
         flagpf=2
         continue
 
@@ -499,15 +493,15 @@ for linha in arq1:
                 
                 rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
                 rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
+ #               rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
                # print(rs.pattern)
-                print(rs2.pattern)
-                if rs2.findall(linha) !=[]:
-                    func.append("EU_MutexLock(0);\n")
-                    func.append("\n"+linha+"\n")
-                    func.append("EU_MutexUnlock(0);\n")
-                else:
-                    func.append("\n"+linha+"\n")
+ #               print(rs2.pattern)
+##                if rs2.findall(linha) !=[]:
+#                    func.append("EU_MutexLock(0);\n")
+#                    func.append("\n"+linha+"\n")
+#                    func.append("EU_MutexUnlock(0);\n")
+#                else:
+                func.append("\n"+linha+"\n")
                 
                 
                 if(flagchave4==0 and re.search("}",linha)):
@@ -559,10 +553,10 @@ for linha in arq1:
                             func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
                             texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
-#                            texto.append("free(estrutura"+str(contador)+");\n");
                         functions.append(func3)
                         func = []
                         func2 = []
+                        flagchave3=0
                         prov_vars_shared = []
                         prov_vars_private = []
                         prov_vars = []
