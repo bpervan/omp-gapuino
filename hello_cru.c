@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <omp.h>
 #include "omp_gap8.h"
 
 void function(){
     int soma;
     soma = 10;
-#pragma omp parallel
+#pragma omp parallel default(none) shared(soma) private()
     printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
 }
 

@@ -54,6 +54,7 @@ schedule = 1
 prov_vars_private = ""
 prov_vars_shared = ""
 prov_vars_shared2 = []
+list_var=[]
 red_oper=""
 red_var=""
 flag_red=0
@@ -112,22 +113,24 @@ for linha in arq1:
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
 
                 for i in prov_vars_shared:
-                    prov_vars_shared2.append(i+r"\s+?=\s+?")
-                    prov_vars_shared2.append(i+r"\s+?\+="  )
-                    prov_vars_shared2.append(i+r"\s+?-="   )
-                    prov_vars_shared2.append(i+r"\s+?\*="  )
-                    prov_vars_shared2.append(i+r"\s+?/="   )
-                    prov_vars_shared2.append(i+r"\s+?\+\+" )
-                    prov_vars_shared2.append(i+r"\s+?--")
-
-               # if flag_red:
-               #     prov_vars_shared.append(red_var)
+                    prov_vars_shared2.append(i+"\s*=\s*")
+                    prov_vars_shared2.append(i+"\s*\+=\s*")
+                    prov_vars_shared2.append(i+"\s*-=\s*")
+                    prov_vars_shared2.append(i+"\s*\*=\s*")
+                    prov_vars_shared2.append(i+"\s*=\s*")
+                    prov_vars_shared2.append(i+"\s*\+\+\s*")
+                    prov_vars_shared2.append(i+"\s*--\s*")
+                print(prov_vars_shared2)
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
+                prov_struct = []
                 for vari in range(var_len):
                     prov_struct.append("int "+str(prov_vars[vari])+";\n")
                     lista_var_pf.append(vari)
                     texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+                list_var.append(["nada"])
+
+
                 structures.append(prov_struct)
                 flagvars=1
         else:
@@ -166,20 +169,22 @@ for linha in arq1:
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
                 for i in prov_vars_shared:
-                    prov_vars_shared2.append(i+r"\s+?=\s+?")
-                    prov_vars_shared2.append(i+r"\s+?\+="  )
-                    prov_vars_shared2.append(i+r"\s+?-="   )
-                    prov_vars_shared2.append(i+r"\s+?\*="  )
-                    prov_vars_shared2.append(i+r"\s+?/="   )
-                    prov_vars_shared2.append(i+r"\s+?\+\+" )
-                    prov_vars_shared2.append(i+r"\s+?--")
-
+                    prov_vars_shared2.append(i+"\s*=\s*")
+                    prov_vars_shared2.append(i+"\s*\+=\s*")
+                    prov_vars_shared2.append(i+"\s*-=\s*")
+                    prov_vars_shared2.append(i+"\s*\*=\s*")
+                    prov_vars_shared2.append(i+"\s*=\s*")
+                    prov_vars_shared2.append(i+"\s*\+\+\s*")
+                    prov_vars_shared2.append(i+"\s*--\s*")
+                print(prov_vars_shared2)
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 for vari in range(var_len):
                     prov_struct.append("int "+str(prov_vars[vari])+";\n")
                     lista_var_pf.append(vari)
                     texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+
+                list_var.append(prov_vars_shared)
                # print(prov_struct)
                 structures.append(prov_struct)
                 flagpf=1
@@ -276,7 +281,8 @@ for linha in arq1:
                             continue
                         func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
                     
-                    
+                    for it in prov_vars_shared:
+                        texto.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
                     
                     
                     
@@ -344,11 +350,13 @@ for linha in arq1:
             func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
             func.append("L1_structure = estrutura"+str(contador-1)+";\n")
             func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
+            func.append("if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure."+str(n)+"%CORE_NUMBER;\n")
             #if re.search("int",for_iter):
                 #texto.append("int "+i+";\n" )
            #     func.append("for(int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
             #    func.append("for("+i+"; "+i+operator+"new_n;"+modifier+")\n{\n")
             #else:
+
             func.append("int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
             func.append("for("+i+";"+i+operator+"new_n;"+modifier+")\n{\n")
             ##texto.append("estrutura"+str(contador-1)+"."+i+"= "+i+";\n")
@@ -411,6 +419,7 @@ for linha in arq1:
         func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
         func.append("L1_structure = estrutura"+str(contador-1)+";\n")
         func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
+        func.append("if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure."+str(n)+"%CORE_NUMBER;\n")
 #        if re.search("int",for_iter):
  #           #texto.append("int "+i+";\n" )
  #j           func.append("for(int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); "+i+operator+"new_n;"+modifier+")\n{\n")
@@ -424,8 +433,8 @@ for linha in arq1:
         #texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
         texto.append("\nparallelfor_function"+str(contador-1)+"(0)\n")
 #need no more append the for limmits
-        print(contador-1)
-        print(len(structures))
+       # print(contador-1)
+       # print(len(structures))
         structures[contador-1].append("int "+str(n)+";\n")
        # structures[contador].append("int "+str(i)+";\n")
         flagpf=2
@@ -491,6 +500,7 @@ for linha in arq1:
                 rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
                 rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                 rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
+               # print(rs.pattern)
                 print(rs2.pattern)
                 if rs2.findall(linha) !=[]:
                     func.append("EU_MutexLock(0);\n")
@@ -535,7 +545,10 @@ for linha in arq1:
                         
                         
                         
-                        
+                        for it in prov_vars_shared:
+                            texto.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
+                    
+
                         
                         
                         
@@ -566,7 +579,6 @@ for linha in arq1:
     else:#nao e regiao paralela
          texto.append(linha)
 #lets define the generic functions to be called
-
 
 
 #####################################
@@ -608,7 +620,7 @@ for cont2 in range(len_structures):
 ######################################################
 #lembre de alocar os structs e de liberar depois
 
-print(contador-1)
+#print(contador-1)
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     #arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
@@ -626,7 +638,8 @@ arq2.write("\n\n")
 arq2.write("void Master_Entry(void *arg) {\n")
 arq2.write("    CLUSTER_CoresFork(caller, arg);\n")
 arq2.write("}\n")
-
+contshare = len(list_var)
+contshare2= contshare
 count2pf = contador-1
 cont_paral = contador-1
 for linha in texto:
@@ -637,6 +650,12 @@ for linha in texto:
         cont_paral = cont_paral - 1
         arq2.write("CLUSTER_Wait(0);\n")
         arq2.write("CLUSTER_Stop(0);\n")
+#        if list_var[contshare-contshare2]!="nada":
+#
+#            for vari in list_var[contshare-contshare2]:
+#                arq2.write(vari+"=estrutura"+str(contador-1-cont_paral-1)+'.'+vari+";\n")
+#                print(vari)
+
     elif re.search("parallelfor_function",linha):
         arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador-1- cont_paral)+", 0);\n")
@@ -644,6 +663,9 @@ for linha in texto:
         cont_paral = cont_paral - 1
         count2pf = count2pf-1
         arq2.write("CLUSTER_Stop(0);\n")
+#        for vari in list_var[contshare-contshare2]:
+#            arq2.write(vari+"=estrutura"+str(contador-1-cont_paral-1)+'.'+vari+";\n")
+#            print(vari)
 
     else:
          arq2.write(linha+"\n")# o fim do arquivo chegou

@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include "omp_gap8.h"
 typedef struct L1_structure0{
-int ignore;
+int soma;
+int ;
 }L1_structure0;
 L1_structure0 estrutura0;
 typedef struct L1_structure1{
@@ -35,35 +36,42 @@ L1_structure2 estrutura2;
 void generic_function0(void* gen_var0){
 int x_flagsingle_x=0;
 
-printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
 }
 void generic_function1(void* gen_var1){
 int x_flagsingle_x=0;
 L1_structure1 L1_structure;
 L1_structure = estrutura1;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
+if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.nada%CORE_NUMBER;
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
 {
+EU_MutexLock(0);
 
-    estrutura1.a+=L1_structure.b+i;
+        estrutura1.a+=L1_structure.b+i;
+EU_MutexUnlock(0);
 if(++x_flagsingle_x==1)
 
-    {
+        {
 
-        printf("%d\n",estrutura1.a);
+            printf("%d\n",estrutura1.a);
+EU_MutexLock(0);
 
-        estrutura1.c+=estrutura1.a;
+            estrutura1.c+=estrutura1.a;
+EU_MutexUnlock(0);
+
+        }
+
+        printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura1.a);
+EU_MutexLock(0);
+
+        L1_structure.soma+=L1_structure.b+estrutura1.c;
+EU_MutexUnlock(0);
+
+        printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
 
     }
-
-    printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura1.a);
-
-    L1_structure.soma+=L1_structure.b+estrutura1.c;
-
-    printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
-
-}
 CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
@@ -76,18 +84,21 @@ int x_flagsingle_x=0;
 L1_structure2 L1_structure;
 L1_structure = estrutura2;
 int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
+if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.nada%CORE_NUMBER;
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
 {
-
-    estrutura2.a+=1;
 EU_MutexLock(0);
-    L1_structure.soma*=2;
+
+        estrutura2.a+=1;
+EU_MutexUnlock(0);
+EU_MutexLock(0);
+        L1_structure.soma*=2;
 EU_MutexUnlock(0);
 
-    printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
+        printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
 
-}
+    }
 CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
@@ -107,13 +118,17 @@ void Master_Entry(void *arg) {
     CLUSTER_CoresFork(caller, arg);
 }
 void function(){
-int soma;
-soma = 10;
+    int soma;
+    soma = 10;
+estrutura0.soma=soma;
+
+estrutura0.=;
+
 CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
-printf("sera que vai dar certo no core: %d\n",omp_get_thread_num());
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
 }
 int main()
 {
@@ -136,9 +151,13 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)1, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
+a=estrutura1.a;
+
+c=estrutura1.c;
+
 soma=soma+estrutura1.soma;
 
-printf("o resultado da soma depois do parallel for1 e: %d\n",soma);
+    printf("o resultado da soma depois do parallel for1 e: %d\n",soma);
 estrutura2.a=a;
 
 estrutura2.c=c;
@@ -157,11 +176,15 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)2, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
+a=estrutura2.a;
+
+c=estrutura2.c;
+
 soma=soma*estrutura2.soma;
 
-    //teste na main
-    //outro teste
-printf("o resultado da soma depois do parallel for2 e: %d\n",soma);
-exit (0);
+        //teste na main
+        //outro teste
+    printf("o resultado da soma depois do parallel for2 e: %d\n",soma);
+    exit (0);
 }
 //teste dps da main
