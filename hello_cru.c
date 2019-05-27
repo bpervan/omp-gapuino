@@ -4,8 +4,8 @@
 void function(){
     int soma;
     soma = 10;
-#pragma omp parallel default(none) shared(soma) private()
-    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
+#pragma omp parallel 
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num());
 }
 
 int main()

@@ -159,15 +159,15 @@ for linha in arq1:
                     flag_red = 1
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
-                for i in prov_vars_shared:
-                    prov_vars_shared2.append(i+"\s*=\s*")
-                    prov_vars_shared2.append(i+"\s*\+=\s*")
-                    prov_vars_shared2.append(i+"\s*-=\s*")
-                    prov_vars_shared2.append(i+"\s*\*=\s*")
-                    prov_vars_shared2.append(i+"\s*=\s*")
-                    prov_vars_shared2.append(i+"\s*\+\+\s*")
-                    prov_vars_shared2.append(i+"\s*--\s*")
-                print(prov_vars_shared2)
+              #  for i in prov_vars_shared:
+              #      prov_vars_shared2.append(i+"\s*=\s*"   )
+              #      prov_vars_shared2.append(i+"\s*\+=\s*" )
+              #      prov_vars_shared2.append(i+"\s*-=\s*"  )
+              #      prov_vars_shared2.append(i+"\s*\*=\s*" )
+              #      prov_vars_shared2.append(i+"\s*=\s*"   )
+              #      prov_vars_shared2.append(i+"\s*\+\+\s*")
+              #      prov_vars_shared2.append(i+"\s*--\s*"  )
+              #  print(prov_vars_shared2)
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 for vari in range(var_len):
@@ -429,7 +429,7 @@ for linha in arq1:
        # print(len(structures))
         structures[contador-1].append("int "+str(n)+";\n")
        # structures[contador].append("int "+str(i)+";\n")
-        if re.search(r")\s*{",linha):
+        if re.search(r"\)\s*{",linha):
             flagchave3=1
         flagpf=2
         continue
@@ -615,11 +615,11 @@ for cont2 in range(len_structures):
 #lembre de alocar os structs e de liberar depois
 
 #print(contador-1)
-for cont2 in range (contador):#escreve as funcoes das zonas paralelas
+for cont2 in range (1,contador):#escreve as funcoes das zonas paralelas
     arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
     #arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
     #print("buga em: "+str(cont2)+"\n")
-    arq2.writelines(functions[cont2])
+    arq2.writelines(functions[cont2-1])
     #print(functions[cont2])
     arq2.write("\n}\n")
 
