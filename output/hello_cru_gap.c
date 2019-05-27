@@ -10,8 +10,7 @@
 #include <stdio.h>
 #include "omp_gap8.h"
 typedef struct L1_structure0{
-int soma;
-int ;
+int ignore;
 }L1_structure0;
 L1_structure0 estrutura0;
 typedef struct L1_structure1{
@@ -36,7 +35,7 @@ L1_structure2 estrutura2;
 void generic_function0(void* gen_var0){
 int x_flagsingle_x=0;
 
-    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num());
 }
 void generic_function1(void* gen_var1){
 int x_flagsingle_x=0;
@@ -48,7 +47,6 @@ int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
 {
 EU_MutexLock(0);
-
         estrutura1.a+=L1_structure.b+i;
 EU_MutexUnlock(0);
 if(++x_flagsingle_x==1)
@@ -56,18 +54,14 @@ if(++x_flagsingle_x==1)
         {
 
             printf("%d\n",estrutura1.a);
-EU_MutexLock(0);
 
             estrutura1.c+=estrutura1.a;
-EU_MutexUnlock(0);
 
         }
 
         printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),estrutura1.a);
-EU_MutexLock(0);
 
         L1_structure.soma+=L1_structure.b+estrutura1.c;
-EU_MutexUnlock(0);
 
         printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
 
@@ -88,10 +82,8 @@ if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.nada%CORE_NU
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
 {
-EU_MutexLock(0);
 
         estrutura2.a+=1;
-EU_MutexUnlock(0);
 EU_MutexLock(0);
         L1_structure.soma*=2;
 EU_MutexUnlock(0);
@@ -120,15 +112,11 @@ void Master_Entry(void *arg) {
 void function(){
     int soma;
     soma = 10;
-estrutura0.soma=soma;
-
-estrutura0.=;
-
 CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
-    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(), soma);
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num());
 }
 int main()
 {

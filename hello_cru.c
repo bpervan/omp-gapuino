@@ -16,6 +16,7 @@ int main()
 #pragma omp parallel for default(none) private(b,r,soma) shared(a,c) reduction(+:soma)
     for (int i = 0 ; i < nada; i++  )
     {
+#pragma omp critical
         a+=b+i;
 #pragma omp single
         {   
