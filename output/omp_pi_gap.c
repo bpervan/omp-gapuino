@@ -18,35 +18,7 @@ float sum;
 int n;
 }L1_structure0;
 L1_structure0 estrutura0;
-void generic_function0(void* gen_var0){
-int x_flagsingle_x=0;
-L1_structure0 L1_structure;
-L1_structure = estrutura0;
-int new_n = (L1_structure.n/CORE_NUMBER)*(omp_get_thread_num()+1);
-if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.n%CORE_NUMBER;
-int i= 0+(L1_structure.n/CORE_NUMBER)*omp_get_thread_num();
-for(i;i<new_n; i++)
-
-    {
-        L1_structure.factor = (i % 2 == 0) ? 1.0 : -1.0;
-
-        L1_structure.sum += L1_structure.factor/(2*i+1);
-if(++x_flagsingle_x==1)
-
-        {
-
-            estrutura0.o = omp_get_thread_num();
-
-        }
-
-    }
-CLUSTER_SynchBarrier();
-EU_MutexLock(0);
-
-estrutura0.sum=estrutura0.sum+L1_structure.sum;
-EU_MutexUnlock(0);
-
-}
+void generic_function0(void* gen_var0);
 void caller(void* arg){
 int x = (int)arg;
 if(x ==0)return generic_function0((void*)x);
@@ -76,13 +48,13 @@ estrutura0.sum=sum;
 
 estrutura0.n = n;
 
-CLUSTER_Start(0, CORE_NUMBER);
+CLUSTER_Start(0,thread_count);
 CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
 o=estrutura0.o;
 
-sum=sum+estrutura0.sum;
+sum) num_threads(thread_count=sum) num_threads(thread_count+estrutura0.sum) num_threads(thread_count;
 
     /* Unset trigger */
     set_pin(trigger,0);
@@ -93,3 +65,33 @@ sum=sum+estrutura0.sum;
     printf("o valor de o e: %d\n",o);
     exit (0);
 }
+void generic_function0(void* gen_var0){
+int x_flagsingle_x=0;
+L1_structure0 L1_structure;
+L1_structure = estrutura0;
+int new_n = (L1_structure.n/CORE_NUMBER)*(omp_get_thread_num()+1);
+if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.n%CORE_NUMBER;
+int i= 0+(L1_structure.n/CORE_NUMBER)*omp_get_thread_num();
+for(i;i<new_n; i++)
+
+    {
+        L1_structure.factor = (i % 2 == 0) ? 1.0 : -1.0;
+
+        L1_structure.sum += L1_structure.factor/(2*i+1);
+if(++x_flagsingle_x==1)
+
+        {
+
+            estrutura0.o = omp_get_thread_num();
+
+        }
+
+    }
+CLUSTER_SynchBarrier();
+EU_MutexLock(0);
+
+estrutura0.sum) num_threads(thread_count=estrutura0.sum) num_threads(thread_count+L1_structure.sum) num_threads(thread_count;
+EU_MutexUnlock(0);
+
+}
+

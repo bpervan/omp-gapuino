@@ -61,7 +61,7 @@ flagchave3=0
 flagchave4=0
 flagvars=0
 flagcrit=0
-
+cores=[]
 flagcrit2=0
 ##############################################################################
 #               _       __              _ _ _                    _           #
@@ -82,28 +82,13 @@ for linha in arq1:
     elif re.search("include",linha) or re.search("define",linha):
         library.append(linha)
         continue
-#######################################################################
-#                           _       __                                # 
-#             ___  ___  ___| | __  / _| ___  _ __                     #
-#            / __|/ _ \/ _ \ |/ / | |_ / _ \| '__|                    #
-#            \__ \  __/  __/   <  |  _| (_) | |                       #
-#            |___/\___|\___|_|\_\ |_|  \___/|_|                       #
-#                                                                     #
-#                                                                     #
-#                                                                     #
-#                                                                     #
-#                             _ _      _                              #
-#       _ __   __ _ _ __ __ _| | | ___| |  _______  _ __   ___  ___   #
-#      | '_ \ / _` | '__/ _` | | |/ _ \ | |_  / _ \| '_ \ / _ \/ __|  #
-#      | |_) | (_| | | | (_| | | |  __/ |  / / (_) | | | |  __/\__ \  #
-#      | .__/ \__,_|_|  \__,_|_|_|\___|_| /___\___/|_| |_|\___||___/  #
-#      |_|                                                            #
-#                                                                     #
-#                                                                     #
-#                                                                     #
-#                                                                     #
-#######################################################################
-    
+
+ ##########################
+#seek for pragma critical#
+##########################   
+
+
+
     if re.search("pragma",linha)and re.search("omp",linha)and re.search("critical",linha):
             print("brabo")
             print("c "+linha)
@@ -146,9 +131,36 @@ for linha in arq1:
         func.append(linha)
 
 
+
+#######################################################################
+#                           _       __                                # 
+#             ___  ___  ___| | __  / _| ___  _ __                     #
+#            / __|/ _ \/ _ \ |/ / | |_ / _ \| '__|                    #
+#            \__ \  __/  __/   <  |  _| (_) | |                       #
+#            |___/\___|\___|_|\_\ |_|  \___/|_|                       #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                             _ _      _                              #
+#       _ __   __ _ _ __ __ _| | | ___| |  _______  _ __   ___  ___   #
+#      | '_ \ / _` | '__/ _` | | |/ _ \ | |_  / _ \| '_ \ / _ \/ __|  #
+#      | |_) | (_| | | | (_| | | |  __/ |  / / (_) | | | |  __/\__ \  #
+#      | .__/ \__,_|_|  \__,_|_|_|\___|_| /___\___/|_| |_|\___||___/  #
+#      |_|                                                            #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#######################################################################
+
     elif re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
         contador = contador+1
-        #texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
+        if re.search("num_threads",linha):
+            cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
+            print(re.findall(r'num_threads\((.*?)\)',linha)[0])
+        else:
+            cores.append("CORE_NUMBER")
         if re.search(r"private|shared",linha):
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
@@ -166,7 +178,11 @@ for linha in arq1:
                 structures.append(prov_struct)
                 flagvars=1
         else:
-            structures.append(["int ignore;\n"])
+                structures.append(["int ignore;\n"])
+                structures.append(["int ignores;\n"])
+                prov_vars_shared = ["ignore"]
+                prov_vars_private = ["ignores"]
+
 
         flagomp = 1
         texto.append("parallel_function"+str(contador-1)+"(0)\n")
@@ -179,7 +195,11 @@ for linha in arq1:
     elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
         
         contador = contador+1
-        
+        if re.search("num_threads",linha):
+            cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
+            print(re.findall(r'num_threads\((.*?)\)',linha)[0])
+        else:
+            cores.append("CORE_NUMBER")
         print("oloco2")
         if not re.search("default",linha):
                 print(linha)
@@ -235,18 +255,19 @@ for linha in arq1:
 
     elif flagomp==1 and not flagcrit: #to dentro de um pragma?
         
-##########################
-#seek for pragma critical#
-##########################
-        print(linha)
+
         
+        print(flagchave)
 
-
+        if linha==r"\s*":
+            func.append(linha)
+            continue
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
-            func.append("if(omp_get_thread_num()==0)\n")
+            func.append("if(++x_flagsingle_x==1)\n")
 
             continue
-        if not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
+
+        elif not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
             flagomp=2
             continue
         elif(re.search("{",linha)and flagchave == 0):
@@ -256,16 +277,22 @@ for linha in arq1:
             flagomp = 0
             
             func.append("\n"+linha)
+            func.append("\n}")
             functions.append(func)
             func = []
         elif flagchave:#estamos dentro de uma zona paralela
             func.append(linha+"\n")
-            if re.search("{",linha):#tem chaves internas
-                    flagchave2=flagchave2+linha.count("{")-linha.count("}")
-            elif re.search("}",linha):
-                    flagchave2=flagchave2-linha.count("}")
-            elif(flagchave2==0 and re.search("}",linha)):
+            print("valor de flagchave2:\n")
+            print(flagchave2)
+            if(flagchave2==0 and re.search("}",linha)):
+                flagchave=0
+                flagomp = 0
                 if flagvars:
+                    rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+                    rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                
+
+                    func2=[]
                     for prov_line in func:
                         if re.search("\"",prov_line):
                             prov2_line = prov_line.split("\"")
@@ -302,18 +329,23 @@ for linha in arq1:
                         func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                         func3.append("EU_MutexUnlock(0);\n")
                         texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
-#                        texto.append("free(estrutura"+str(contador)+");\n");
                         functions.append(func3)
                         func2 = []
                         prov_vars_shared = []
                         prov_vars_private = []
                         prov_vars = []
-                flagchave=0
-                flagomp = 0
-                functions.append(func)
-                func = []
 
-        
+                    functions.append(func3)
+                    func2 = []
+                    prov_vars_shared = []
+                    prov_vars_private = []
+                    prov_vars = []
+
+
+            elif re.search("{",linha):#tem chaves internas
+                    flagchave2=flagchave2+linha.count("{")-linha.count("}")
+            elif re.search("}",linha):
+                    flagchave2=flagchave2-linha.count("}")
     elif flagomp==2 and not flagcrit:
    
             
@@ -436,15 +468,9 @@ for linha in arq1:
 
         func.append("int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
         func.append("for("+i+";"+i+operator+"new_n; i"+modifier.split(i)[1]+")\n\n")
-        ##texto.append("estrutura"+str(contador-1)+"."+i+"= "+i+";\n")
         texto.append("estrutura"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
-        #texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
         texto.append("\nparallelfor_function"+str(contador-1)+"(0)\n")
-#need no more append the for limmits
-       # print(contador-1)
-       # print(len(structures))
         structures[contador-1].append("int "+str(n)+";\n")
-       # structures[contador].append("int "+str(i)+";\n")
         if re.search(r"\)\s*{",linha):
             flagchave3=1
         flagpf=2
@@ -454,49 +480,14 @@ for linha in arq1:
 
 
     elif flagpf==2 and not flagcrit:
-       # print("chave do inferno\n"+linha)
-       # #if re.search("pragma",linha) and re.search("omp",linha)and (re.search("critical",linha) or re.search("atomic",linha)): 
-       # if re.search(r"pragma\s+omp\s+critical",linha):
-       #     print("c "+linha)
-       #     flagcrit=1
-       #     func.append("\nEU_MutexLock(0);\n")
-       #     continue
-       # elif flagcrit==1:
-       #     
-       #     if linha==r"\s*":
-       #         func.append(linha)
-       #         continue
-       #     elif not re.search("{",linha):
-       #         func.append(linha)
-       #         func.append("\nEU_MutexUnlock(0);\n")
-       #         flagcrit=0
-
-       #         continue
-       #     else:
-       #         func.append(linha)
-       #         flagcrit=2
-       #         flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-       #         continue
-       #         
-       # elif flagcrit==2:
-       #     print("c2 "+linha)
-       #     func.append("\n")
-       #     if(flagcrit2==1 and re.search("}",linha)):
-       #             func.append("\nEU_MutexUnlock(0);\n")
-       #             flagcrit=0
-       #             flagcrit2=0
-       #     elif re.search("{",linha):#tem chaves internas
-       #             flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-       #     elif re.search("}",linha):
-       #             flagcrit2=flagcrit2-linha.count("}")
-       #     
-
-       #     func.append(linha)
-
 
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
             func.append("if(++x_flagsingle_x==1)\n")
             continue
+        if linha=="\s*":
+            func.append(linha)
+            continue
+
         elif(re.search("{",linha)and flagchave3 == 0):
             func.append(linha)
             flagchave3 = 1
@@ -504,7 +495,6 @@ for linha in arq1:
         elif not flagchave3:#o for é só a próxima linha
             #replacing shared variables with actual structure
             flagpf = 0
-
             func.append("\n"+linha+"\n")
             func.append("\n}\n")
             functions.append(func)
@@ -576,6 +566,7 @@ for linha in arq1:
                             func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
                             texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
+                        func3.append("\n}\n")
                         functions.append(func3)
                         func = []
                         func2 = []
@@ -619,33 +610,24 @@ print(contador)
 #                                   # 
 #####################################
 
-for i in functions:
-    print(i)
-
+print("a quantidade de funcoes e: "+str(len(functions)) )
 
 for linha in library:
     arq2.write(linha+"\n")
 len_structures = len(structures)
-#print(str(len_structures)+" é a quantidade de estruturas")
-#print(structures)
+
+
 for cont2 in range(len_structures):
     arq2.write("typedef struct L1_structure"+str(cont2)+"{\n")
     #structures[cont2].append("int IDstructure;\n")
     arq2.writelines(structures[cont2])
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+" estrutura"+str(cont2)+";\n")
-    #arq2.write("estrutura"+str(cont2)+".IDstructure="+str(cont2)+";\n")
-######################################################
-#lembre de alocar os structs e de liberar depois
 
-#print(contador-1)
+
+
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
-    arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
-    #arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
-    print("buga em: "+str(cont2)+"\n")
-    arq2.writelines(functions[cont2])
-    #print(functions[cont2])
-    arq2.write("\n}\n")
+    arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+");\n")
 
 arq2.write("void caller(void* arg){\n")
 arq2.write("int x = (int)arg;\n")
@@ -663,7 +645,7 @@ cont_paral = contador-1
 for linha in texto:
     #ligando e desligando o cluster
     if re.search("parallel_function",linha):
-        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
+        arq2.write("CLUSTER_Start(0,"+cores[contador-1- cont_paral] +");\n")
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador-1- cont_paral)+", 0);\n")
         cont_paral = cont_paral - 1
         arq2.write("CLUSTER_Wait(0);\n")
@@ -675,7 +657,7 @@ for linha in texto:
 #                print(vari)
 
     elif re.search("parallelfor_function",linha):
-        arq2.write("CLUSTER_Start(0, CORE_NUMBER);\n")
+        arq2.write("CLUSTER_Start(0,"+cores[contador-1- cont_paral] +");\n")
         arq2.write("CLUSTER_SendTask(0, Master_Entry, (void *)"+str(contador-1- cont_paral)+", 0);\n")
         arq2.write("CLUSTER_Wait(0);\n")
         cont_paral = cont_paral - 1
@@ -687,8 +669,13 @@ for linha in texto:
 
     else:
          arq2.write(linha+"\n")# o fim do arquivo chegou
+for cont2 in range (contador):#escreve as funcoes das zonas paralelas
+    arq2.write("void generic_function"+str(cont2)+"(void* gen_var"+str(cont2)+"){\n")
+    #arq2.write("printf(\"\\ngeneric function "+str(cont2)+"\\n\");\n")
+    print("buga em: "+str(cont2)+"\n")
+    arq2.writelines(functions[cont2])
+    arq2.write("\n")
+
+        
 arq1.close()
 arq2.close()
-#for line in functions:
-#    print(line)
-#    print("\n")
