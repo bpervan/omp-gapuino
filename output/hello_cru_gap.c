@@ -14,21 +14,21 @@ int ignore;
 }L1_structure0;
 L1_structure0 estrutura0;
 typedef struct L1_structure1{
-int a;
-int c;
-int b;
-int r;
-int soma;
+float a;
+float c;
+float b;
+float r;
+float soma;
 int nada;
 }L1_structure1;
 L1_structure1 estrutura1;
 typedef struct L1_structure2{
-int a;
-int c;
-int b;
-int r;
-int soma;
-int w;
+float a;
+float c;
+float b;
+float r;
+float soma;
+float w;
 int nada;
 }L1_structure2;
 L1_structure2 estrutura2;
@@ -45,7 +45,8 @@ int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.nada%CORE_NUMBER;
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
-{
+
+    {
 EU_MutexLock(0);
         estrutura1.a+=L1_structure.b+i;
 EU_MutexUnlock(0);
@@ -81,9 +82,10 @@ int new_n = (L1_structure.nada/CORE_NUMBER)*(omp_get_thread_num()+1);
 if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.nada%CORE_NUMBER;
 int i= 0+(L1_structure.nada/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
-{
 
+    {
         estrutura2.a+=1;
+
 EU_MutexLock(0);
         L1_structure.soma*=2;
 EU_MutexUnlock(0);
@@ -116,7 +118,6 @@ CLUSTER_Start(0, CORE_NUMBER);
 CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
-    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num());
 }
 int main()
 {

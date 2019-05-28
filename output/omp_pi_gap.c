@@ -31,6 +31,13 @@ for(i;i<new_n; i++)
         L1_structure.factor = (i % 2 == 0) ? 1.0 : -1.0;
 
         L1_structure.sum += L1_structure.factor/(2*i+1);
+if(++x_flagsingle_x==1)
+
+        {
+
+            estrutura0.o = omp_get_thread_num();
+
+        }
 
     }
 CLUSTER_SynchBarrier();
@@ -83,5 +90,6 @@ sum=sum+estrutura0.sum;
     printf("With n = %d terms and %d threads,\n", n, thread_count);
     printf("   Our estimate of pi = %d\n", (int) (100000*sum));
     printf("                   pi = %d\n", (int) (100000*4.0*atan(1.0)));
+    printf("o valor de o e: %d\n",o);
     exit (0);
 }

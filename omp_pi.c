@@ -20,11 +20,16 @@ int main() {
     /* Set trigger */
     set_pin(trigger,1);
 
-/*#pragma omp parallel for default(none)  private(factor,sum) shared(o) reduction(+:sum)*/
+#pragma omp parallel for default(none)  private(factor,sum) shared(o) reduction(+:sum)
     for (i = 0; i < n; i++) 
     {
         factor = (i % 2 == 0) ? 1.0 : -1.0; 
         sum += factor/(2*i+1);
+#pragma omp single
+        {
+            o = omp_get_thread_num(); 
+        }
+
     }
 
     /* Unset trigger */
@@ -34,5 +39,6 @@ int main() {
     printf("With n = %d terms and %d threads,\n", n, thread_count);
     printf("   Our estimate of pi = %d\n", (int) (100000*sum));
     printf("                   pi = %d\n", (int) (100000*4.0*atan(1.0)));
+    printf("o valor de o e: %d\n",o);
     exit (0);
 }

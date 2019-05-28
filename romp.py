@@ -103,8 +103,50 @@ for linha in arq1:
 #                                                                     #
 #                                                                     #
 #######################################################################
+    
+    if re.search("pragma",linha)and re.search("omp",linha)and re.search("critical",linha):
+            print("brabo")
+            print("c "+linha)
+            flagcrit=1
+            func.append("\nEU_MutexLock(0);\n")
+            continue
+    elif flagcrit==1:
+        
+        if linha==r"\s*":
+            print("vot")
+            func.append(linha)
+            continue
+        elif not re.search("{",linha):
+            print("era pra acabar aqui\n")
+            func.append(linha)
+            func.append("\nEU_MutexUnlock(0);\n")
+            flagcrit=0
 
-    if re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
+            continue
+        else:
+            print("pq entrou aqui\n")
+            func.append(linha)
+            flagcrit=2
+            flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+            continue
+            
+    elif flagcrit==2:
+        print("c2 "+linha)
+        func.append("\n")
+        if(flagcrit2==1 and re.search("}",linha)):
+                func.append("\nEU_MutexUnlock(0);\n")
+                flagcrit=0
+                flagcrit2=0
+        elif re.search("{",linha):#tem chaves internas
+                flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+        elif re.search("}",linha):
+                flagcrit2=flagcrit2-linha.count("}")
+        
+
+        func.append(linha)
+
+
+    elif re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
         contador = contador+1
         #texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
         if re.search(r"private|shared",linha):
@@ -191,52 +233,23 @@ for linha in arq1:
 #############################################################
 
 
-    if flagomp==1: #to dentro de um pragma?
+    elif flagomp==1 and not flagcrit: #to dentro de um pragma?
         
 ##########################
 #seek for pragma critical#
 ##########################
-        if re.search("pragma\s+omp\s+critical",linha): 
-            flagcrit=1
-            func.append("EU_MutexLock(0);\n")
-            continue
-        if flagcrit==1:
-            if linha==r"\s*":
-                func.append(linha)
-                continue
-            elif not re.search("{",linha):
-                func.append(linha)
-                func.append("\nEU_MutexUnlock(0);\n")
-                flagcrit=0
-                continue
-            elif flagcrit2==0 and re.search("{"):
-                func.append(linha)
-                flagcrit=2
-                flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-                continue
-                
-        elif flagcrit==2:
-            if re.search("{",linha):#tem chaves internas
-                    flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-                    func.append(linha)
-            elif re.search("}",linha):
-                    flagcrit2=flagcrit2-linha.count("}")
-                    func.append(linha)
-                    
-            elif(flagcrit2==0 and re.search("}",linha)):
-                func.append(linha)
-                func.append("\nEU_MutexUnlock(0);\n")
-                flagcrit=0
-            continue
+        print(linha)
+        
+
 
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
             func.append("if(omp_get_thread_num()==0)\n")
 
             continue
-        elif not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
+        if not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
             flagomp=2
             continue
-        if(re.search("{",linha)and flagchave == 0):
+        elif(re.search("{",linha)and flagchave == 0):
             flagchave = 1
             continue
         elif not flagchave:#a zona paralela é só a próxima linha
@@ -301,7 +314,7 @@ for linha in arq1:
                 func = []
 
         
-    if flagomp==2:
+    elif flagomp==2 and not flagcrit:
    
             
             #lets seek for iterator var and limmit of iteration
@@ -352,7 +365,7 @@ for linha in arq1:
             #else:
 
             func.append("int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
-            func.append("for("+i+";"+i+operator+"new_n;"+modifier+")\n{\n")
+            func.append("for("+i+";"+i+operator+"new_n;"+modifier+")\n\n")
             ##texto.append("estrutura"+str(contador-1)+"."+i+"= "+i+";\n")
             texto.append("estrutura"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
     #need no more append the for limmits
@@ -372,7 +385,7 @@ for linha in arq1:
 #                                                                            # 
 ##############################################################################
 
-    elif flagpf==1:
+    elif flagpf==1 and not flagcrit:
 
 
 
@@ -440,48 +453,48 @@ for linha in arq1:
 
 
 
-    elif flagpf==2:
-        print("chave do inferno\n"+linha)
-        #if re.search("pragma",linha) and re.search("omp",linha)and (re.search("critical",linha) or re.search("atomic",linha)): 
-        if re.search(r"pragma\s+omp\s+critical",linha):
-            print("c "+linha)
-            flagcrit=1
-            func.append("\nEU_MutexLock(0);\n")
-            continue
-        elif flagcrit==1:
-            
-            if linha==r"\s*":
-                func.append(linha)
-                continue
-            elif not re.search("{",linha):
-                func.append(linha)
-                func.append("\nEU_MutexUnlock(0);\n")
-                flagcrit=0
+    elif flagpf==2 and not flagcrit:
+       # print("chave do inferno\n"+linha)
+       # #if re.search("pragma",linha) and re.search("omp",linha)and (re.search("critical",linha) or re.search("atomic",linha)): 
+       # if re.search(r"pragma\s+omp\s+critical",linha):
+       #     print("c "+linha)
+       #     flagcrit=1
+       #     func.append("\nEU_MutexLock(0);\n")
+       #     continue
+       # elif flagcrit==1:
+       #     
+       #     if linha==r"\s*":
+       #         func.append(linha)
+       #         continue
+       #     elif not re.search("{",linha):
+       #         func.append(linha)
+       #         func.append("\nEU_MutexUnlock(0);\n")
+       #         flagcrit=0
 
-                continue
-            else:
-                func.append(linha)
-                flagcrit=2
-                flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-                continue
-                
-        elif flagcrit==2:
-            print("c2 "+linha)
-            func.append("\n")
-            if(flagcrit2==1 and re.search("}",linha)):
-                    func.append("\nEU_MutexUnlock(0);\n")
-                    flagcrit=0
-                    flagcrit2=0
-            elif re.search("{",linha):#tem chaves internas
-                    flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-            elif re.search("}",linha):
-                    flagcrit2=flagcrit2-linha.count("}")
-            
+       #         continue
+       #     else:
+       #         func.append(linha)
+       #         flagcrit=2
+       #         flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+       #         continue
+       #         
+       # elif flagcrit==2:
+       #     print("c2 "+linha)
+       #     func.append("\n")
+       #     if(flagcrit2==1 and re.search("}",linha)):
+       #             func.append("\nEU_MutexUnlock(0);\n")
+       #             flagcrit=0
+       #             flagcrit2=0
+       #     elif re.search("{",linha):#tem chaves internas
+       #             flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
+       #     elif re.search("}",linha):
+       #             flagcrit2=flagcrit2-linha.count("}")
+       #     
 
-            func.append(linha)
+       #     func.append(linha)
 
 
-        elif re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
+        if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
             func.append("if(++x_flagsingle_x==1)\n")
             continue
         elif(re.search("{",linha)and flagchave3 == 0):
