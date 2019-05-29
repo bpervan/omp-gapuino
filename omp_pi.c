@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "omp_gap8.h" 
-#include "lib/pin.h"
+//#include "lib/pin.h"
 
 
 int main() {
@@ -10,15 +10,15 @@ int main() {
     double factor;
     double sum = 0.0;
     int o=0;
-    thread_count = 4;
+    thread_count = 8;
     n = 1000000;
 
-    PinName trigger = GPIO_A17;
+//    PinName trigger = GPIO_A17;
 
-    init_pin(trigger);
+ //   init_pin(trigger);
 
     /* Set trigger */
-    set_pin(trigger,1);
+  //  set_pin(trigger,1);
 
 #pragma omp parallel for default(none) num_threads(thread_count) private(factor,sum) shared(o) reduction(+:sum) 
     for (i = 0; i < n; i++) 
@@ -33,7 +33,7 @@ int main() {
     }
 
     /* Unset trigger */
-    set_pin(trigger,0);
+   // set_pin(trigger,0);
 
     sum = 4.0*sum;
     printf("With n = %d terms and %d threads,\n", n, thread_count);

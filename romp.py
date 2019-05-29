@@ -90,19 +90,16 @@ for linha in arq1:
 
 
     if re.search("pragma",linha)and re.search("omp",linha)and re.search("critical",linha):
-            print("brabo")
-            print("c "+linha)
+        
             flagcrit=1
             func.append("\nEU_MutexLock(0);\n")
             continue
     elif flagcrit==1:
         
         if linha==r"\s*":
-            print("vot")
             func.append(linha)
             continue
         elif not re.search("{",linha):
-            print("era pra acabar aqui\n")
             func.append(linha)
             func.append("\nEU_MutexUnlock(0);\n")
             flagcrit=0
@@ -116,7 +113,6 @@ for linha in arq1:
             continue
             
     elif flagcrit==2:
-        print("c2 "+linha)
         func.append("\n")
         if(flagcrit2==1 and re.search("}",linha)):
                 func.append("\nEU_MutexUnlock(0);\n")
@@ -154,7 +150,8 @@ for linha in arq1:
 #                                                                     #
 #######################################################################
 
-    elif re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
+    #elif re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
+    elif re.search(r"pragma\s*omp\s*parallel\s*",linha)and not re.search("for",linha):    
         contador = contador+1
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
@@ -192,8 +189,8 @@ for linha in arq1:
 
 
 
-    elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
-        
+    #elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
+    elif re.search(r"pragma\s*omp\s*parallel\s*for",linha):    
         contador = contador+1
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
@@ -221,6 +218,9 @@ for linha in arq1:
                     flag_red = 1
                 prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
                 prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+
+
+
               #  for i in prov_vars_shared:
               #      prov_vars_shared2.append(i+"\s*=\s*"   )
               #      prov_vars_shared2.append(i+"\s*\+=\s*" )

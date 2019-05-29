@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "omp_gap8.h"
-#include "lib/pin.h"
+//#include "lib/pin.h"
 typedef struct L1_structure0{
 float o;
 float factor;
@@ -34,12 +34,12 @@ int main() {
     double factor;
     double sum = 0.0;
     int o=0;
-    thread_count = 4;
+    thread_count = 8;
     n = 1000000;
-    PinName trigger = GPIO_A17;
-    init_pin(trigger);
+//    PinName trigger = GPIO_A17;
+ //   init_pin(trigger);
     /* Set trigger */
-    set_pin(trigger,1);
+  //  set_pin(trigger,1);
 estrutura0.o=o;
 
 estrutura0.factor=factor;
@@ -54,10 +54,10 @@ CLUSTER_Wait(0);
 CLUSTER_Stop(0);
 o=estrutura0.o;
 
-sum) num_threads(thread_count=sum) num_threads(thread_count+estrutura0.sum) num_threads(thread_count;
+sum=sum+estrutura0.sum;
 
     /* Unset trigger */
-    set_pin(trigger,0);
+   // set_pin(trigger,0);
     sum = 4.0*sum;
     printf("With n = %d terms and %d threads,\n", n, thread_count);
     printf("   Our estimate of pi = %d\n", (int) (100000*sum));
@@ -90,7 +90,7 @@ if(++x_flagsingle_x==1)
 CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
-estrutura0.sum) num_threads(thread_count=estrutura0.sum) num_threads(thread_count+L1_structure.sum) num_threads(thread_count;
+estrutura0.sum=estrutura0.sum+L1_structure.sum;
 EU_MutexUnlock(0);
 
 }
