@@ -626,7 +626,7 @@ for cont2 in range(len_structures):
     arq2.writelines(structures[cont2])
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+" estrutura"+str(cont2)+";\n")
-arq.write("int x_flagsingle_x=0;\n")
+arq2.write("int x_flagsingle_x=0;\n")
 
 
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas
