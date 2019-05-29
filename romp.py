@@ -263,9 +263,8 @@ for linha in arq1:
             func.append(linha)
             continue
         if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
-            func.append("EU_MutexLock(0);\n")
+            
             func.append("if(++x_flagsingle_x==1)\n")
-            func.append("EU_MutexUnlock(0);\n")
             continue
 
         elif not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
@@ -483,9 +482,7 @@ for linha in arq1:
     elif flagpf==2 and not flagcrit:
 
         if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
-            func.append("EU_MutexLock(0);\n")
             func.append("if(++x_flagsingle_x==1)\n")
-            func.append("EU_MutexUnlock(0);\n")
             continue
         if linha=="\s*":
             func.append(linha)
@@ -653,7 +650,7 @@ for linha in texto:
         cont_paral = cont_paral - 1
         arq2.write("CLUSTER_Wait(0);\n")
         arq2.write("CLUSTER_Stop(0);\n")
-        arq2.write("int x_flagsingle_x=0;\n")
+        arq2.write("x_flagsingle_x=0;\n")
 
     elif re.search("parallelfor_function",linha):
         arq2.write("CLUSTER_Start(0,"+cores[contador-1- cont_paral] +");\n")
@@ -662,7 +659,7 @@ for linha in texto:
         cont_paral = cont_paral - 1
         count2pf = count2pf-1
         arq2.write("CLUSTER_Stop(0);\n")
-        arq2.write("int x_flagsingle_x=0;\n")
+        arq2.write("x_flagsingle_x=0;\n")
 
     else:
          arq2.write(linha+"\n")# o fim do arquivo chegou
