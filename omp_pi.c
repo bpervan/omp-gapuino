@@ -20,15 +20,11 @@ int main() {
     /* Set trigger */
   //  set_pin(trigger,1);
 
-#pragma omp parallel for default(none) num_threads(thread_count) private(factor,sum) shared(o) reduction(+:sum) 
+#pragma omp parallel for default(none) num_threads(thread_count) private(factor,sum) reduction(+:sum) 
     for (i = 0; i < n; i++) 
     {
         factor = (i % 2 == 0) ? 1.0 : -1.0; 
         sum += factor/(2*i+1);
-#pragma omp single
-        {
-            o = omp_get_thread_num(); 
-        }
 
     }
 

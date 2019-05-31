@@ -25,7 +25,8 @@ arq2.write("#define CORE_NUMBER   (8)\n")
 
 
 
-
+flag_hasSh=0
+flag_hasPr=0
 flagchave2 = 0
 flagchave = 0
 flagomp = 0
@@ -64,6 +65,7 @@ flagsingle2=0
 #|___/\___|\___|_|\_\ |_|  \___/|_|    |_|_|_.__/|_|  \__,_|_|  |_|\___||___/#
 #                                                                            #
 ##############################################################################
+print("aways remember to declare all private and shared vars\n")
 for linha in arq1:
     linha=linha.rstrip()
     if linha.rstrip()=="" or linha.rstrip()=="\n":
@@ -230,55 +232,58 @@ for linha in arq1:
         else:
             cores.append("CORE_NUMBER")
 
+        if(re.search(r"private\s*\(.+\)",linha)):
 
+            prov_vars_private = prov_vars_private + re.findall(r'private\((.*?)\)',linha)[0].split(',')
+            print(prov_vars_private)
+            flag_hasPr=1
 
-        if not re.search("default",linha):
-                print(linha)
-                print("use default(none) specifying public and shared variables directive to parallel for")
-                break;
-        else:
-                prov_struct = []
+        if(re.search(r"shared\s*\(.+\)",linha)):
+
+            prov_vars_shared = prov_vars_shared + re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+            print(prov_vars_shared)
+
+            flag_hasSh=1
+
 
             ################################################################## 
         #######verivy if have a reduction clause and identify the variable #########
                #############################################################
 
 
-                if re.search("reduction",linha) or re.search("reduction\(",linha):
-                    reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
-                    red_oper = reduct[0]
-                    red_var = reduct[1]
-                    flag_red = 1
-                prov_vars_private =prov_vars_private + re.findall(r'private\((.*?)\)',linha)[0].split(',')
-                prov_vars_shared = prov_vars_shared + re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+        if re.search("reduction",linha) or re.search("reduction\(",linha):
+            reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
+            red_oper = reduct[0]
+            red_var = reduct[1]
+            flag_red = 1
+        prov_struct = []
+        prov_vars = prov_vars_shared+prov_vars_private
+        var_len = len(prov_vars_shared)+ len(prov_vars_private) 
+        for vari in range(var_len):
+            prov_struct.append("float "+str(prov_vars[vari])+";\n")
+            lista_var_pf.append(vari)
+            texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+
+        list_var.append(prov_vars_shared)
+        structures.append(prov_struct)
+        flagpf=1
+        continue
 
 
 
 
+      #  for i in prov_vars_shared:
+      #      prov_vars_shared2.append(i+"\s*=\s*"   )
+      #      prov_vars_shared2.append(i+"\s*\+=\s*" )
+      #      prov_vars_shared2.append(i+"\s*-=\s*"  )
+      #      prov_vars_shared2.append(i+"\s*\*=\s*" )
+      #      prov_vars_shared2.append(i+"\s*=\s*"   )
+      #      prov_vars_shared2.append(i+"\s*\+\+\s*")
+      #      prov_vars_shared2.append(i+"\s*--\s*"  )
+      #  print(prov_vars_shared2)
 
-              #  for i in prov_vars_shared:
-              #      prov_vars_shared2.append(i+"\s*=\s*"   )
-              #      prov_vars_shared2.append(i+"\s*\+=\s*" )
-              #      prov_vars_shared2.append(i+"\s*-=\s*"  )
-              #      prov_vars_shared2.append(i+"\s*\*=\s*" )
-              #      prov_vars_shared2.append(i+"\s*=\s*"   )
-              #      prov_vars_shared2.append(i+"\s*\+\+\s*")
-              #      prov_vars_shared2.append(i+"\s*--\s*"  )
-              #  print(prov_vars_shared2)
 
-
-                prov_vars = prov_vars_shared+prov_vars_private
-                var_len = len(prov_vars_shared)+ len(prov_vars_private) 
-                for vari in range(var_len):
-                    prov_struct.append("float "+str(prov_vars[vari])+";\n")
-                    lista_var_pf.append(vari)
-                    texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
-
-                list_var.append(prov_vars_shared)
-               # print(prov_struct)
-                structures.append(prov_struct)
-                flagpf=1
-                continue
+        
 
 #############################################################
 #                                               _ _      _  #
@@ -530,7 +535,9 @@ for linha in arq1:
             flagchave3 = 1
             continue
         elif not flagchave3:#o for é só a próxima linha
-            #replacing shared variables with actual structure
+            ##################################################
+   ##########replacing shared variables with actual structure###########
+            ##################################################
             flagpf = 0
             func.append("\n"+linha+"\n")
             func.append("\n}\n")
@@ -541,9 +548,6 @@ for linha in arq1:
 
 
         elif flagchave3:#estamos dentro de um for paralelo
-                rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-
  #               rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
                # print(rs.pattern)
  #               print(rs2.pattern)
@@ -556,45 +560,65 @@ for linha in arq1:
                 
                 
                 if(flagchave4==0 and re.search("}",linha)):
-            
-                        rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                        flagchave3=0
-                        flagpf = 0
-                        #print(prov_vars_shared)
-                        func4=[]
-                        for provline in func:
-                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
-                        func2=[]
-                        
-                        
-                        
-                        for prov_line in func4:
-                            if re.search("\"",prov_line):
-                                prov2_line = prov_line.split("\"")
-                                prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                continue
-                            func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
                         func3=[]
-                        
-                        
-                        
-                        
-                        for prov_line in func2:
-                            structu="estrutura"+str(contador-1)+"."
-                            if re.search("\"",prov_line):
-                                prov2_line = prov_line.split("\"")
+                        if(flag_hasSh and not flag_hasPr):
+                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                            for prov_line in func:
+                                structu="estrutura"+str(contador-1)+"."
+                                if re.search("\"",prov_line):
+                                    prov2_line = prov_line.split("\"")
+                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
+                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                    continue
+                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
+                            for it in prov_vars_shared:
+                                texto.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
 
-                                prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                continue
-                            func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
+
+
+                        #print(prov_vars_shared)
+#                        func4=[]
+#                        for provline in func:
+#                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
+                        if(not flag_hasSh and flag_hasPr):
+                        
+                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+                            for prov_line in func:
+                                if re.search("\"",prov_line):
+                                    prov2_line = prov_line.split("\"")
+                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
+                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                    continue
+                                func3.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
                         
                         
+                        if(flag_hasSh and flag_hasPr):
+                            func2 = []
+                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+                            for prov_line in func:
+                                if re.search("\"",prov_line):
+                                    prov2_line = prov_line.split("\"")
+                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
+                                    func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                    continue
+                                func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
+                        
+                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+
+                            for prov_line in func2:
+                                structu="estrutura"+str(contador-1)+"."
+                                if re.search("\"",prov_line):
+                                    prov2_line = prov_line.split("\"")
+                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
+                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
+                                    continue
+                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
+                            for it in prov_vars_shared:
+                                texto.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
+
+
                         
                         
-                        for it in prov_vars_shared:
-                            texto.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
                     
 
                         
@@ -608,12 +632,14 @@ for linha in arq1:
                             func3.append("EU_MutexUnlock(0);\n")
                             texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
                             flag_red=0
-
+                        flag_hasSh=0
+                        flag_hasPr=0
                         func3.append("\n}\n")
                         functions.append(func3)
                         func = []
                         func4=[]
                         func2 = []
+                        flagpf=0
                         flagchave3=0
                         prov_vars_shared = []
                         prov_vars_private = []

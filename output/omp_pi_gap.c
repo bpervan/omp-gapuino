@@ -12,7 +12,6 @@
 #include "omp_gap8.h"
 //#include "lib/pin.h"
 typedef struct L1_structure0{
-float o;
 float factor;
 float sum;
 int n;
@@ -42,8 +41,6 @@ int main() {
  //   init_pin(trigger);
     /* Set trigger */
   //  set_pin(trigger,1);
-estrutura0.o=o;
-
 estrutura0.factor=factor;
 
 estrutura0.sum=sum;
@@ -55,8 +52,6 @@ CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
 x_flagsingle_x=0;
-o=estrutura0.o;
-
 sum=sum+estrutura0.sum;
 
     /* Unset trigger */
@@ -80,14 +75,6 @@ for(i;i<new_n; i++)
         L1_structure.factor = (i % 2 == 0) ? 1.0 : -1.0;
 
         L1_structure.sum += L1_structure.factor/(2*i+1);
-EU_MutexLock(0);
-if(++x_flagsingle_x==1)
-        {
-            estrutura0.o = omp_get_thread_num();
-
-        }
-
-EU_MutexUnlock(0);
 
     }
 CLUSTER_SynchBarrier();
