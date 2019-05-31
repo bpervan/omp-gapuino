@@ -23,16 +23,6 @@ arq2.write("#include "+"<time.h>\n")
 arq2.write("#include <stdlib.h>\n")
 arq2.write("#define CORE_NUMBER   (8)\n")
 
-def hasncb(listx,cont):
-    if cont == 0:
-        return 0
-    elif re.search("{",listx):
-        cont=cont+listx.count("{")-listx.count("}")
-        return 1
-    elif re.search("}",listx):
-         cont=cont-listx.count("}")
-         return 1
-
 
 
 
@@ -44,14 +34,13 @@ functions=[]
 texto = []
 contador = 0
 flagpf = 0
-#it = iter(arq1)
 library =[]
 structures =[]
 it_arq1 = iter(arq1)
 lista_var_pf=[]
 schedule = 1
-prov_vars_private = ""
-prov_vars_shared = ""
+prov_vars_private = []
+prov_vars_shared = []
 prov_vars_shared2 = []
 list_var=[]
 red_oper=""
@@ -63,6 +52,10 @@ flagvars=0
 flagcrit=0
 cores=[]
 flagcrit2=0
+flagsingle=0
+flagsingle2=0
+
+
 ##############################################################################
 #               _       __              _ _ _                    _           #
 # ___  ___  ___| | __  / _| ___  _ __  | (_) |__  _ __ __ _ _ __(_) ___  ___ #
@@ -106,27 +99,61 @@ for linha in arq1:
 
             continue
         else:
-            print("pq entrou aqui\n")
             func.append(linha)
             flagcrit=2
             flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
             continue
             
-    elif flagcrit==2:
-        func.append("\n")
-        if(flagcrit2==1 and re.search("}",linha)):
+    if flagcrit==2:
+        
+        func.append("\n"+linha+"\n")
+
+        if(flagcrit2+linha.count("{")==linha.count("}")):
                 func.append("\nEU_MutexUnlock(0);\n")
                 flagcrit=0
                 flagcrit2=0
-        elif re.search("{",linha):#tem chaves internas
+                continue
+        else: 
                 flagcrit2=flagcrit2+linha.count("{")-linha.count("}")
-        elif re.search("}",linha):
-                flagcrit2=flagcrit2-linha.count("}")
-        
-
-        func.append(linha)
+                continue
 
 
+########################
+#seek for pragma single#
+########################   
+
+
+
+    if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
+            func.append("EU_MutexLock(0);\n")
+            func.append("if(++x_flagsingle_x==1)\n")
+            flagsingle=1
+            continue
+    elif flagsingle==1:
+        if linha==r"\s*":
+            func.append(linha)
+            continue
+        elif not re.search("{",linha):
+            func.append(linha)
+            func.append("\nEU_MutexUnlock(0);\n")
+            flagsingle=0
+
+            continue
+        else:
+            func.append(linha)
+            flagsingle=2
+            flagsingle2=flagsingle2+linha.count("{")-linha.count("}")
+            continue
+            
+    elif flagsingle==2:
+
+        func.append("\n"+linha+"\n")
+        if(flagsingle2+linha.count("{") == linha.count("}")):
+            func.append("\nEU_MutexUnlock(0);\n")
+            flagsingle2=0
+            flagsingle=0
+        else:
+            flagsingle2=flagsingle2+linha.count("{")-linha.count("}")
 
 #######################################################################
 #                           _       __                                # 
@@ -151,16 +178,20 @@ for linha in arq1:
 #######################################################################
 
     #elif re.search("pragma",linha) and re.search("omp",linha)and re.search("parallel",linha) and (not re.search("for",linha)): #é regiao paralela?
+    
+
     elif re.search(r"pragma\s+omp\s+parallel\s*",linha)and not re.search("for",linha):    
         contador = contador+1
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
             print(re.findall(r'num_threads\((.*?)\)',linha)[0])
+            texto.append("estrutura"+str(contador-1)+".num_cores="+cores[contador-1]+";\n")
         else:
             cores.append("CORE_NUMBER")
+            texto.append("estrutura"+str(contador-1)+".num_cores="+cores[contador-1]+";\n")
         if re.search(r"private|shared",linha):
-                prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
-                prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+                prov_vars_private =prov_vars_private + re.findall(r'private\((.*?)\)',linha)[0].split(',')
+                prov_vars_shared = prov_vars_shared + re.findall(r'shared\((.*?)\)',linha)[0].split(',')
 
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
@@ -195,9 +226,12 @@ for linha in arq1:
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
             print(re.findall(r'num_threads\((.*?)\)',linha)[0])
+            
         else:
             cores.append("CORE_NUMBER")
-        print("oloco2")
+
+
+
         if not re.search("default",linha):
                 print(linha)
                 print("use default(none) specifying public and shared variables directive to parallel for")
@@ -205,19 +239,20 @@ for linha in arq1:
         else:
                 prov_struct = []
 
-                
-                #texto.append("estrutura"+str(contador-1)+"=malloc(CORE_NUMBER*sizeof(L1_structure"+str(contador-1)+"));\n")
-
-               ##############################################################
+            ################################################################## 
         #######verivy if have a reduction clause and identify the variable #########
                #############################################################
+
+
                 if re.search("reduction",linha) or re.search("reduction\(",linha):
                     reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
                     red_oper = reduct[0]
                     red_var = reduct[1]
                     flag_red = 1
-                prov_vars_private = re.findall(r'private\((.*?)\)',linha)[0].split(',')
-                prov_vars_shared = re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+                prov_vars_private =prov_vars_private + re.findall(r'private\((.*?)\)',linha)[0].split(',')
+                prov_vars_shared = prov_vars_shared + re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+
+
 
 
 
@@ -230,6 +265,8 @@ for linha in arq1:
               #      prov_vars_shared2.append(i+"\s*\+\+\s*")
               #      prov_vars_shared2.append(i+"\s*--\s*"  )
               #  print(prov_vars_shared2)
+
+
                 prov_vars = prov_vars_shared+prov_vars_private
                 var_len = len(prov_vars_shared)+ len(prov_vars_private) 
                 for vari in range(var_len):
@@ -262,10 +299,7 @@ for linha in arq1:
         if linha==r"\s*":
             func.append(linha)
             continue
-        if re.search("pragma",linha) and re.search("omp",linha) and re.search("single",linha):
-            
-            func.append("if(++x_flagsingle_x==1)\n")
-            continue
+        
 
         elif not re.search("parallel",linha) and re.search("pragma",linha) and re.search("omp",linha) and re.search("for",linha):
             flagomp=2
@@ -290,10 +324,13 @@ for linha in arq1:
                 if flagvars:
                     rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
                     rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+                    func4=[]
+                    for provline in func:
+                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
                 
 
                     func2=[]
-                    for prov_line in func:
+                    for prov_line in func4:
                         if re.search("\"",prov_line):
                             prov2_line = prov_line.split("\"")
                             prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
@@ -329,12 +366,13 @@ for linha in arq1:
                         func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                         func3.append("EU_MutexUnlock(0);\n")
                         texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
+                        flag_red=0
                         functions.append(func3)
                         func2 = []
                         prov_vars_shared = []
                         prov_vars_private = []
                         prov_vars = []
-
+                    func4=[]
                     functions.append(func3)
                     func2 = []
                     prov_vars_shared = []
@@ -389,7 +427,9 @@ for linha in arq1:
             func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
             func.append("L1_structure = estrutura"+str(contador-1)+";\n")
             func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
-            func.append("if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure."+str(n)+"%CORE_NUMBER;\n")
+
+            func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%omp_get_num_threads()) new_n++;\n")
+
             #if re.search("int",for_iter):
                 #texto.append("int "+i+";\n" )
            #     func.append("for(int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
@@ -481,9 +521,6 @@ for linha in arq1:
 
     elif flagpf==2 and not flagcrit:
 
-        if re.search("pragma",linha)and re.search("omp",linha) and re.search("single",linha):
-            func.append("if(++x_flagsingle_x==1)\n")
-            continue
         if linha=="\s*":
             func.append(linha)
             continue
@@ -506,6 +543,7 @@ for linha in arq1:
         elif flagchave3:#estamos dentro de um for paralelo
                 rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
                 rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+
  #               rs2 = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared2)))
                # print(rs.pattern)
  #               print(rs2.pattern)
@@ -518,16 +556,19 @@ for linha in arq1:
                 
                 
                 if(flagchave4==0 and re.search("}",linha)):
-
+            
                         rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                         flagchave3=0
                         flagpf = 0
                         #print(prov_vars_shared)
+                        func4=[]
+                        for provline in func:
+                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
                         func2=[]
                         
                         
                         
-                        for prov_line in func:
+                        for prov_line in func4:
                             if re.search("\"",prov_line):
                                 prov2_line = prov_line.split("\"")
                                 prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
@@ -566,9 +607,12 @@ for linha in arq1:
                             func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
                             texto.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
+                            flag_red=0
+
                         func3.append("\n}\n")
                         functions.append(func3)
                         func = []
+                        func4=[]
                         func2 = []
                         flagchave3=0
                         prov_vars_shared = []
@@ -621,6 +665,7 @@ for cont2 in range(len_structures):
     arq2.write("typedef struct L1_structure"+str(cont2)+"{\n")
     #structures[cont2].append("int IDstructure;\n")
     arq2.writelines(structures[cont2])
+    arq2.write("int num_cores;\n")
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+" estrutura"+str(cont2)+";\n")
 arq2.write("int x_flagsingle_x=0;\n")

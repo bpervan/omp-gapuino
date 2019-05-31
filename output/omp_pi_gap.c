@@ -16,6 +16,7 @@ float o;
 float factor;
 float sum;
 int n;
+int num_cores;
 }L1_structure0;
 L1_structure0 estrutura0;
 int x_flagsingle_x=0;
@@ -79,15 +80,14 @@ for(i;i<new_n; i++)
         L1_structure.factor = (i % 2 == 0) ? 1.0 : -1.0;
 
         L1_structure.sum += L1_structure.factor/(2*i+1);
-//EU_MutexLock(0);
+EU_MutexLock(0);
 if(++x_flagsingle_x==1)
-//EU_MutexUnlock(0);
-
         {
-
             estrutura0.o = omp_get_thread_num();
 
         }
+
+EU_MutexUnlock(0);
 
     }
 CLUSTER_SynchBarrier();

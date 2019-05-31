@@ -6,7 +6,7 @@
 #include "gap_dmamchan.h"
 #include <time.h>
 #include <stdlib.h>
-#define CORE_NUMBER   (4)
+#define CORE_NUMBER   (8)
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,8 +18,10 @@ float a;
 float b;
 float n;
 float qqrcoisa;
+int num_cores;
 }L1_structure0;
 L1_structure0 estrutura0;
+int x_flagsingle_x=0;
 void generic_function0(void* gen_var0);
 void caller(void* arg){
 int x = (int)arg;
@@ -98,9 +100,11 @@ int main()
     double  global_result;        /* Store result in global_result */
     double  a=0, b=1000;                 /* Left and right endpoints      */
     int     n=4000;                    /* Total number of trapezoids    */
-    int     thread_count=4;
+    int     thread_count=8;
     global_result = 0.0;
     int qqrcoisa = 10;
+estrutura0.num_cores=thread_count;
+
 estrutura0.global_result=global_result;
 
 estrutura0.a=a;
@@ -115,6 +119,7 @@ CLUSTER_Start(0,thread_count);
 CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
+x_flagsingle_x=0;
 global_result=estrutura0.global_result;
 
 a=estrutura0.a;
@@ -129,12 +134,15 @@ n=estrutura0.n;
     exit(0);
 }  /* main */
 void generic_function0(void* gen_var0){
-int x_flagsingle_x=0;
         double my_result = 0.0;
         my_result += Local_trap(estrutura0.a, estrutura0.b, estrutura0.n);
 
 EU_MutexLock(0);
-        estrutura0.global_result += my_result;
+        {
+            estrutura0.global_result += my_result;
+
+        }
+
 EU_MutexUnlock(0);
     }
 
