@@ -88,9 +88,7 @@ int main()
         double my_result = 0.0;
         my_result += Local_trap(a, b, n);
 #  pragma omp critical
-        {
             global_result += my_result;
-        }
     }
 
     printf("With n = %d trapezoids, our estimate\n", n);

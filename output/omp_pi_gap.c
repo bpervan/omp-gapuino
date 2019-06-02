@@ -19,6 +19,7 @@ int num_cores;
 }L1_structure0;
 L1_structure0 estrutura0;
 int x_flagsingle_x=0;
+int cores_num[1];
 void generic_function0(void* gen_var0);
 void caller(void* arg){
 int x = (int)arg;
@@ -41,6 +42,8 @@ int main() {
  //   init_pin(trigger);
     /* Set trigger */
   //  set_pin(trigger,1);
+cores_num[0]=thread_count;
+
 estrutura0.factor=factor;
 
 estrutura0.sum=sum;
@@ -67,7 +70,7 @@ void generic_function0(void* gen_var0){
 L1_structure0 L1_structure;
 L1_structure = estrutura0;
 int new_n = (L1_structure.n/CORE_NUMBER)*(omp_get_thread_num()+1);
-if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure.n%CORE_NUMBER;
+if (omp_get_thread_num()<L1_structure.n%cores_num[0])new_n++;
 int i= 0+(L1_structure.n/CORE_NUMBER)*omp_get_thread_num();
 for(i;i<new_n; i++)
 

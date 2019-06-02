@@ -187,50 +187,67 @@ for linha in arq1:
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
             print(re.findall(r'num_threads\((.*?)\)',linha)[0])
-            texto.append("estrutura"+str(contador-1)+".num_cores="+cores[contador-1]+";\n")
+            texto.append("cores_num["+str(contador-1)+"]="+re.findall(r'num_threads\((.*?)\)',linha)[0]+";\n")
+
         else:
             cores.append("CORE_NUMBER")
-            texto.append("estrutura"+str(contador-1)+".num_cores="+cores[contador-1]+";\n")
-        if re.search(r"private|shared",linha):
+            texto.append("cores_num["+str(contador-1)+"]=CORE_NUMBER;\n")
+        if re.search(r"private",linha):
                 prov_vars_private =prov_vars_private + re.findall(r'private\((.*?)\)',linha)[0].split(',')
+                flag_hasPr=1
+
+        if re.search(r"shared",linha):
                 prov_vars_shared = prov_vars_shared + re.findall(r'shared\((.*?)\)',linha)[0].split(',')
+                flag_hasSh=1
+        prov_vars = prov_vars_shared+prov_vars_private
+        var_len = len(prov_vars_shared)+ len(prov_vars_private) 
+        prov_struct = []
+        for vari in range(var_len):
+            prov_struct.append("float "+str(prov_vars[vari])+";\n")
+            lista_var_pf.append(vari)
+            texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
 
-                prov_vars = prov_vars_shared+prov_vars_private
-                var_len = len(prov_vars_shared)+ len(prov_vars_private) 
-                prov_struct = []
-                for vari in range(var_len):
-                    prov_struct.append("float "+str(prov_vars[vari])+";\n")
-                    lista_var_pf.append(vari)
-                    texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
-                list_var.append(["nada"])
+        structures.append(prov_struct)
+        if re.search("reduction",linha) or re.search("reduction\(",linha):
+            reduct = re.findall(r'reduction\((.+)\)',linha)[0].split(":")
+            red_oper = reduct[0]
+            red_var = reduct[1]
+            flag_red = 1
+        prov_struct = []
+        prov_vars = prov_vars_shared+prov_vars_private
+        var_len = len(prov_vars_shared)+ len(prov_vars_private) 
+        for vari in range(var_len):
+            prov_struct.append("float "+str(prov_vars[vari])+";\n")
+            lista_var_pf.append(vari)
+            texto.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
 
-
-                structures.append(prov_struct)
-                flagvars=1
-        else:
-                structures.append(["int ignore;\n"])
-                structures.append(["int ignores;\n"])
-                prov_vars_shared = ["ignore"]
-                prov_vars_private = ["ignores"]
-
-
+        structures.append(prov_struct)
         flagomp = 1
         texto.append("parallel_function"+str(contador-1)+"(0)\n")
-        
         continue
 
 
 
 
-    #elif re.search("pragma",linha) and re.search("omp",linha) and re.search("parallel",linha) and re.search("for",linha):       
+
+
+###########################
+#  seek for parallel for  #
+###########################
+
+
+
+
     elif re.search(r"pragma\s+omp\s+parallel\s+for",linha):    
         contador = contador+1
         if re.search("num_threads",linha):
             cores.append(re.findall(r'num_threads\((.*?)\)',linha)[0])
             print(re.findall(r'num_threads\((.*?)\)',linha)[0])
+            texto.append("cores_num["+str(contador-1)+"]="+re.findall(r'num_threads\((.*?)\)',linha)[0]+";\n")
             
         else:
             cores.append("CORE_NUMBER")
+            texto.append("cores_num["+str(contador-1)+"]=CORE_NUMBER;\n")
 
         if(re.search(r"private\s*\(.+\)",linha)):
 
@@ -432,8 +449,9 @@ for linha in arq1:
             func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
             func.append("L1_structure = estrutura"+str(contador-1)+";\n")
             func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
+            func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%cores_num["+str(contador-1)+"])new_n++;\n")
 
-            func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%omp_get_num_threads()) new_n++;\n")
+            #func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%omp_get_num_threads()) new_n++;\n")
 
             #if re.search("int",for_iter):
                 #texto.append("int "+i+";\n" )
@@ -504,7 +522,9 @@ for linha in arq1:
         func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
         func.append("L1_structure = estrutura"+str(contador-1)+";\n")
         func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
-        func.append("if (omp_get_thread_num()==CORE_NUMBER-1)new_n = new_n+ L1_structure."+str(n)+"%CORE_NUMBER;\n")
+        func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%cores_num["+str(contador-1)+"])new_n++;\n")
+
+
 #        if re.search("int",for_iter):
  #           #texto.append("int "+i+";\n" )
  #j           func.append("for(int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num(); "+i+operator+"new_n;"+modifier+")\n{\n")
@@ -658,7 +678,9 @@ for linha in arq1:
          texto.append(linha)
 #lets define the generic functions to be called
 print("contador eh: \n")
+
 print(contador)
+print(functions)
 #####################################
 #               _ _   _             #  
 #__      ___ __(_) |_(_)_ __   __ _ # 
@@ -695,6 +717,8 @@ for cont2 in range(len_structures):
     arq2.write("}L1_structure"+str(cont2)+";\n")
     arq2.write("L1_structure"+str(cont2)+" estrutura"+str(cont2)+";\n")
 arq2.write("int x_flagsingle_x=0;\n")
+
+arq2.write("int cores_num["+str(contador)+"];\n")
 
 
 for cont2 in range (contador):#escreve as funcoes das zonas paralelas

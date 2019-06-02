@@ -21,7 +21,17 @@ float qqrcoisa;
 int num_cores;
 }L1_structure0;
 L1_structure0 estrutura0;
+typedef struct L1_structure1{
+float global_result;
+float a;
+float b;
+float n;
+float qqrcoisa;
+int num_cores;
+}L1_structure1;
+L1_structure1 estrutura1;
 int x_flagsingle_x=0;
+int cores_num[1];
 void generic_function0(void* gen_var0);
 void caller(void* arg){
 int x = (int)arg;
@@ -103,7 +113,17 @@ int main()
     int     thread_count=8;
     global_result = 0.0;
     int qqrcoisa = 10;
-estrutura0.num_cores=thread_count;
+cores_num[0]=thread_count;
+
+estrutura0.global_result=global_result;
+
+estrutura0.a=a;
+
+estrutura0.b=b;
+
+estrutura0.n=n;
+
+estrutura0.qqrcoisa=qqrcoisa;
 
 estrutura0.global_result=global_result;
 
@@ -120,29 +140,9 @@ CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
 x_flagsingle_x=0;
-global_result=estrutura0.global_result;
-
-a=estrutura0.a;
-
-b=estrutura0.b;
-
-n=estrutura0.n;
-
     printf("With n = %d trapezoids, our estimate\n", n);
     printf("of the integral from %d to %d = %d\n",
             (int) a, (int) b, (int) global_result);
     exit(0);
 }  /* main */
 void generic_function0(void* gen_var0){
-        double my_result = 0.0;
-        my_result += Local_trap(estrutura0.a, estrutura0.b, estrutura0.n);
-
-EU_MutexLock(0);
-        {
-            estrutura0.global_result += my_result;
-
-        }
-
-EU_MutexUnlock(0);
-    }
-
