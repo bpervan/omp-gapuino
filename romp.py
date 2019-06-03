@@ -69,9 +69,9 @@ print("aways remember to declare all private and shared vars\n")
 for r_line in arq1:
 
     
-    r_line=r_line.rstrip()
-    if r_line.rstrip()=="" or r_line.rstrip()=="\n":
-            continue
+#    r_line=r_line.rstrip()
+#    if r_line.rstrip()=="" or r_line.rstrip()=="\n":
+#            continue
     if re.search("<stdio>", r_line):
         continue
     elif re.search("omp.h", r_line):
@@ -207,7 +207,7 @@ for r_line in arq1:
         for vari in range(var_len):
             prov_struct.append("float "+str(prov_vars[vari])+";\n")
             lista_var_pf.append(vari)
-            new_file.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+            new_file.append("romp_global_structure"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
 
         structures.append(prov_struct)
         if re.search("reduction",r_line) or re.search("reduction\(",r_line):
@@ -215,13 +215,14 @@ for r_line in arq1:
             red_oper = reduct[0]
             red_var = reduct[1]
             flag_red = 1
+            new_file.append("romp_global_structure"+str(contador-1)+"."+red_var+"="+red_var+";\n")
         prov_struct = []
         prov_vars = prov_vars_shared+prov_vars_private
         var_len = len(prov_vars_shared)+ len(prov_vars_private) 
         for vari in range(var_len):
             prov_struct.append("float "+str(prov_vars[vari])+";\n")
             lista_var_pf.append(vari)
-            new_file.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+            new_file.append("romp_global_structure"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
 
         structures.append(prov_struct)
         flagomp = 1
@@ -276,13 +277,15 @@ for r_line in arq1:
             red_oper = reduct[0]
             red_var = reduct[1]
             flag_red = 1
+            structures
+            new_file.append("romp_global_structure"+str(contador-1)+"."+red_var+"="+red_var+";\n")
         prov_struct = []
         prov_vars = prov_vars_shared+prov_vars_private
         var_len = len(prov_vars_shared)+ len(prov_vars_private) 
         for vari in range(var_len):
             prov_struct.append("float "+str(prov_vars[vari])+";\n")
             lista_var_pf.append(vari)
-            new_file.append("estrutura"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
+            new_file.append("romp_global_structure"+str(contador-1)+"."+str(prov_vars[vari])+"="+str(prov_vars[vari])+";\n")
 
         list_var.append(prov_vars_shared)
         structures.append(prov_struct)
@@ -317,7 +320,13 @@ for r_line in arq1:
 
     elif flagomp==1 and not flagcrit: #to dentro de um pragma?
         #r_line = re.sub("omp_get_num_threads()","cores_num["+str(contador-1)+"]",r_line)
-        if r_line=="\s*":
+        rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
+        rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
+        if(flag_hasPr):
+            r_line = rp.sub(r"L1_structure.\1",r_line)
+        if(flag_hasSh):
+            r_line = rp.sub(r"romp_global_structure"+str(contador-1)+r".\1",r_line)
+        if r_line==r"\s*":
             func.append(r_line)
             continue
 
@@ -329,81 +338,11 @@ for r_line in arq1:
             ##################################################
    ##########replacing shared variables with actual structure###########
             ##################################################
-                        func3=[]
-                        if(flag_hasSh and not flag_hasPr):
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                            for prov_line in func:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
-
-
-
-                        #print(prov_vars_shared)
-#                        func4=[]
-#                        for provline in func:
-#                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
-                        if(not flag_hasSh and flag_hasPr):
                         
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                        
-                        if(flag_hasSh and flag_hasPr):
-                            func2 = []
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-
-                            for prov_line in func2:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
-
-
-                        
-                        
-                    
-
-                        
-                        
-                        
-                        if flag_red:
-                            func3.append("EU_MutexLock(0);\n")
-                            
-                            func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
-                            func3.append("EU_MutexUnlock(0);\n")
-                            new_file.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
-                            flag_red=0
                         flagomp = 0
                         func.append("\n"+r_line+"\n")
                         func.append("\n}\n")
-                        functions.append(func3)
+                        functions.append(func)
                         func = []
 
         elif flagchave:#estamos dentro de um for paralelo
@@ -419,62 +358,10 @@ for r_line in arq1:
                 
                 
                 if(flagchave2==0 and re.search("}",r_line)):
-                        func3=[]
-                        if(flag_hasSh and not flag_hasPr):
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                            for prov_line in func:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
+                        for it in prov_vars_shared:
+                                new_file.append(it+"=romp_global_structure"+str(contador-1)+"."+it+";\n")
 
-
-
-                        #print(prov_vars_shared)
-#                        func4=[]
-#                        for provline in func:
-#                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
-                        if(not flag_hasSh and flag_hasPr):
                         
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                        
-                        if(flag_hasSh and flag_hasPr):
-                            func2 = []
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-
-                            for prov_line in func2:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
-
 
                         
                         
@@ -484,19 +371,18 @@ for r_line in arq1:
                         
                         
                         if flag_red:
-                            func3.append("EU_MutexLock(0);\n")
-                            
-                            func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
-                            func3.append("EU_MutexUnlock(0);\n")
-                            new_file.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
+                            func.append("EU_MutexLock(0);\n")
+                            structures[contador-1].append("float "+red_var+";\n")
+                            func.append("\nromp_global_structure"+str(contador-1)+"."+red_var+"=romp_global_structure"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
+                            func.append("EU_MutexUnlock(0);\n")
+                            new_file.append(red_var+"="+red_var+red_oper+"romp_global_structure"+str(contador-1)+"."+red_var+";\n")
                             flag_red=0
                         flag_hasSh=0
                         flag_hasPr=0
-                        func3.append("\n}\n")
+                        func.append("\n}\n")
                         functions.append(func3)
                         func = []
                         func4=[]
-                        func2 = []
                         flagchave=0
                         prov_vars_shared = []
                         prov_vars_private = []
@@ -506,7 +392,11 @@ for r_line in arq1:
                 elif re.search("}",r_line):
                         flagchave2=flagchave2-r_line.count("}")
     elif flagomp==2 and not flagcrit:
-   
+            if r_line==r"\s*":
+                func.append(r_line)
+                continue
+
+  
             #r_line = re.sub("omp_get_num_threads()","cores_num["+str(contador-1)+"]",r_line)
             
             #lets seek for iterator var and limmit of iteration
@@ -547,13 +437,13 @@ for r_line in arq1:
                 #########################################
 
             func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
-            func.append("L1_structure = estrutura"+str(contador-1)+";\n")
+            func.append("L1_structure = romp_global_structure"+str(contador-1)+";\n")
             func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
             func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%cores_num["+str(contador-1)+"])new_n++;\n")
 
             func.append("int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
             func.append("for("+i+";"+i+operator+"new_n;"+modifier+")\n\n")
-            new_file.append("estrutura"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
+            new_file.append("romp_global_structure"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
     #need no more append the for limmits
             structures[contador-1].append("int "+str(n)+";\n")
             flagomp=1
@@ -575,6 +465,9 @@ for r_line in arq1:
 
         #r_line = re.sub("omp_get_num_threads()","cores_num["+str(contador-1)+"]",r_line)
 
+        if r_line==r"\s*":
+                func.append(r_line)
+                continue
 
         #lets seek for iterator var and limmit of iteration
         for_iter = re.findall("(\(.*\;)",r_line)[0]
@@ -612,7 +505,7 @@ for r_line in arq1:
        ######appending the new for function parallel#########
             #########################################
         func.append("L1_structure"+str(contador-1)+" L1_structure;\n")
-        func.append("L1_structure = estrutura"+str(contador-1)+";\n")
+        func.append("L1_structure = romp_global_structure"+str(contador-1)+";\n")
         func.append("int new_n = (L1_structure."+str(n)+"/CORE_NUMBER)*(omp_get_thread_num()+1);\n")
         func.append("if (omp_get_thread_num()<L1_structure."+str(n)+"%cores_num["+str(contador-1)+"])new_n++;\n")
 
@@ -625,7 +518,7 @@ for r_line in arq1:
 
         func.append("int "+i+"= "+str(starter)+"+(L1_structure."+str(n)+"/CORE_NUMBER)*omp_get_thread_num();\n")
         func.append("for("+i+";"+i+operator+"new_n; i"+modifier.split(i)[1]+")\n\n")
-        new_file.append("estrutura"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
+        new_file.append("romp_global_structure"+str(contador-1)+"."+str(n)+" = "+str(n)+";\n")
         new_file.append("\nparallelfor_function"+str(contador-1)+"(0)\n")
         structures[contador-1].append("int "+str(n)+";\n")
         if re.search(r"\)\s*{",r_line):
@@ -639,7 +532,7 @@ for r_line in arq1:
     elif flagpf==2 and not flagcrit:
 
         #r_line = re.sub("omp_get_num_threads()","cores_num["+str(contador-1)+"]",r_line)
-        if r_line=="\s*":
+        if r_line==r"\s*":
             func.append(r_line)
             continue
 
@@ -651,79 +544,7 @@ for r_line in arq1:
             ##################################################
    ##########replacing shared variables with actual structure###########
             ##################################################
-                        func3=[]
-                        if(flag_hasSh and not flag_hasPr):
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-                            for prov_line in func:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
-
-
-
-                        #print(prov_vars_shared)
-#                        func4=[]
-#                        for provline in func:
-#                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
-                        if(not flag_hasSh and flag_hasPr):
                         
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                        
-                        if(flag_hasSh and flag_hasPr):
-                            func2 = []
-                            rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
-                            for prov_line in func:
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rp.sub(r"L1_structure.\1",prov_line)).split("\"")
-                                    func2.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func2.append(''.join(rp.sub(r"L1_structure.\1",prov_line)))
-                        
-                            rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
-
-                            for prov_line in func2:
-                                structu="estrutura"+str(contador-1)+"."
-                                if re.search("\"",prov_line):
-                                    prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
-                                    func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
-                                    continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
-                            for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
-
-
-                        
-                        
-                    
-
-                        
-                        
-                        
-                        if flag_red:
-                            func3.append("EU_MutexLock(0);\n")
-                            
-                            func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
-                            func3.append("EU_MutexUnlock(0);\n")
-                            new_file.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
-                            flag_red=0
-                        flag_hasSh=0
-                        flag_hasPr=0
                         flagpf = 0
                         func.append("\n"+r_line+"\n")
                         func.append("\n}\n")
@@ -750,22 +571,22 @@ for r_line in arq1:
                         if(flag_hasSh and not flag_hasPr):
                             rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
                             for prov_line in func:
-                                structu="estrutura"+str(contador-1)+"."
+                                structu="romp_global_structure"+str(contador-1)+"."
                                 if re.search("\"",prov_line):
                                     prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
+                                    prov3_line = ''.join(rs.sub("romp_global_structure"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
                                     func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
                                     continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
+                                func3.append(''.join(rs.sub("romp_global_structure"+str(contador-1)+'.'+r'\1',prov_line)))
                             for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
+                                new_file.append(it+"=romp_global_structure"+str(contador-1)+"."+it+";\n")
 
 
 
                         #print(prov_vars_shared)
 #                        func4=[]
 #                        for provline in func:
-#                            func4.append(re.sub(r"omp_get_num_threads()","estrutura"+str(contador-1)+".num_cores",provline))
+#                            func4.append(re.sub(r"omp_get_num_threads()","romp_global_structure"+str(contador-1)+".num_cores",provline))
                         if(not flag_hasSh and flag_hasPr):
                         
                             rp = re.compile(r'\b({})\b'.format('|'.join(prov_vars_private)))
@@ -792,15 +613,15 @@ for r_line in arq1:
                             rs = re.compile(r'\b({})\b'.format('|'.join(prov_vars_shared)))
 
                             for prov_line in func2:
-                                structu="estrutura"+str(contador-1)+"."
+                                structu="romp_global_structure"+str(contador-1)+"."
                                 if re.search("\"",prov_line):
                                     prov2_line = prov_line.split("\"")
-                                    prov3_line = ''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
+                                    prov3_line = ''.join(rs.sub("romp_global_structure"+str(contador-1)+'.'+r'\1',prov_line)).split("\"")
                                     func3.append(prov3_line[0]+"\""+prov2_line[1]+"\""+prov3_line[2])
                                     continue
-                                func3.append(''.join(rs.sub("estrutura"+str(contador-1)+'.'+r'\1',prov_line)))
+                                func3.append(''.join(rs.sub("romp_global_structure"+str(contador-1)+'.'+r'\1',prov_line)))
                             for it in prov_vars_shared:
-                                new_file.append(it+"=estrutura"+str(contador-1)+"."+it+";\n")
+                                new_file.append(it+"=romp_global_structure"+str(contador-1)+"."+it+";\n")
 
 
                         
@@ -813,9 +634,10 @@ for r_line in arq1:
                         if flag_red:
                             func3.append("EU_MutexLock(0);\n")
                             
-                            func3.append("\nestrutura"+str(contador-1)+"."+red_var+"=estrutura"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
+                            structures[contador-1].append("float "+red_var+";\n")
+                            func3.append("\nromp_global_structure"+str(contador-1)+"."+red_var+"=romp_global_structure"+str(contador-1)+"."+red_var+red_oper+"L1_structure."+red_var+";\n")
                             func3.append("EU_MutexUnlock(0);\n")
-                            new_file.append(red_var+"="+red_var+red_oper+"estrutura"+str(contador-1)+"."+red_var+";\n")
+                            new_file.append(red_var+"="+red_var+red_oper+"romp_global_structure"+str(contador-1)+"."+red_var+";\n")
                             flag_red=0
                         flag_hasSh=0
                         flag_hasPr=0
@@ -880,7 +702,7 @@ for cont2 in range(len_structures):
     arq2.writelines(structures[cont2])
     arq2.write("int num_cores;\n")
     arq2.write("}L1_structure"+str(cont2)+";\n")
-    arq2.write("L1_structure"+str(cont2)+" estrutura"+str(cont2)+";\n")
+    arq2.write("L1_structure"+str(cont2)+" romp_global_structure"+str(cont2)+";\n")
 arq2.write("int x_flagsingle_x=0;\n")
 arq2.write("int romp_cores=CORE_NUMBER;\n")
 arq2.write("int cores_num["+str(contador)+"];\n")
