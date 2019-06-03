@@ -11,7 +11,7 @@ int omp_get_thread_num()
 	return  __core_ID();
 }
 
-int omp_get_num_threads()
-{
-    return CORE_NUMBER;
-}
+//int omp_get_num_threads()
+//{
+//    return CORE_NUMBER;
+//}

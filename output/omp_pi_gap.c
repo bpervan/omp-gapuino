@@ -19,6 +19,7 @@ int num_cores;
 }L1_structure0;
 L1_structure0 estrutura0;
 int x_flagsingle_x=0;
+int romp_cores=CORE_NUMBER;
 int cores_num[1];
 void generic_function0(void* gen_var0);
 void caller(void* arg){
@@ -42,7 +43,7 @@ int main() {
  //   init_pin(trigger);
     /* Set trigger */
   //  set_pin(trigger,1);
-cores_num[0]=thread_count;
+romp_cores=thread_count;
 
 estrutura0.factor=factor;
 
@@ -55,6 +56,7 @@ CLUSTER_SendTask(0, Master_Entry, (void *)0, 0);
 CLUSTER_Wait(0);
 CLUSTER_Stop(0);
 x_flagsingle_x=0;
+romp_cores=CORE_NUMBER;
 sum=sum+estrutura0.sum;
 
     /* Unset trigger */
@@ -80,7 +82,6 @@ for(i;i<new_n; i++)
         L1_structure.sum += L1_structure.factor/(2*i+1);
 
     }
-CLUSTER_SynchBarrier();
 EU_MutexLock(0);
 
 estrutura0.sum=estrutura0.sum+L1_structure.sum;

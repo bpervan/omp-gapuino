@@ -8,12 +8,13 @@ int omp_get_thread_num()
 {
 	return  __core_ID();
 }
-
+extern int romp_cores;
 int omp_get_num_threads()
 {
-#ifdef CORE_NUMBER
-    return CORE_NUMBER;
-#else
-    return 8;
-#endif
+    return romp_cores;
+//#ifdef CORE_NUMBER
+//    return CORE_NUMBER;
+//#else
+//    return 8;
+//#endif
 }

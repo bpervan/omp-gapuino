@@ -83,7 +83,7 @@ int main()
 
     global_result = 0.0;
     int qqrcoisa = 10;
-#  pragma omp parallel num_threads(thread_count) shared(global_result,a,b,n) private(qqrcoisa)
+#  pragma omp parallel num_threads(thread_count) shared(global_result,a,b,n) 
     {
         double my_result = 0.0;
         my_result += Local_trap(a, b, n);
