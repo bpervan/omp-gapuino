@@ -11,17 +11,14 @@ int main()
     for (int i = 0 ; i < N; i++  )
     {
 #pragma omp critical
-{
+        {
             a+=b+i;
-
             c+=a;
+            soma+=b+c;
+        }
         printf("o valor de i no core %d e: %d\n",omp_get_thread_num(),i);
-        soma+=b+c;
         printf("soma = %d no core: %d\n", soma, omp_get_thread_num());
+        printf("o resultado da soma depois do parallel for1 e: %d\n",soma);
     }
-    printf("o resultado da soma depois do parallel for1 e: %d\n",soma);
-
     exit (0);
-
-}
 }

@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#o script a seguir deve ler e traduzir um codigo em openmp para mbedos
+#The follow script is a parser to read OpenMP in GAP8
 #include "gap_cluster.h"
 import sys
 import re
@@ -75,7 +75,9 @@ for r_line in arq1:
 #seek for pragma critical#
 ##########################   
 
-    if re.search("pragma",r_line) and re.search("omp",r_line) and re.search("critical",r_line):
+    if re.search("#\s*pragma\s+omp\s+critical",r_line):
+
+
             flagcrit=1
             func.append("\nEU_MutexLock(0);\n")
             continue
@@ -115,7 +117,9 @@ for r_line in arq1:
 
 
 
-    if re.search("pragma",r_line) and re.search("omp",r_line) and re.search("single",r_line):
+    if re.search("#\s*pragma\s+omp\s+single",r_line):
+
+
             func.append("EU_MutexLock(0);\n")
             func.append("if(++x_flagsingle_x==1)\n")
             flagsingle=1
@@ -141,6 +145,8 @@ for r_line in arq1:
         func.append("\n"+r_line+"\n")
         if(flagsingle2+r_line.count("{") == r_line.count("}")):
             func.append("\nEU_MutexUnlock(0);\n")
+            func.append("CLUSTER_SynchBarrier();\n");
+            func.append("x_flagsingle_x=0;\n")
             flagsingle2=0
             flagsingle=0
         else:

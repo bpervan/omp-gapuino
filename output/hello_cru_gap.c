@@ -1,11 +1,5 @@
-#include "cmsis.h"
 #include "gap_common.h"
-#include "mbed_wait_api.h"
-// FEATURE_CLUSTER
 #include "gap_cluster.h"
-#include "gap_dmamchan.h"
-#include <time.h>
-#include <stdlib.h>
 #define CORE_NUMBER   (8)
 #include <stdio.h>
 
@@ -19,7 +13,6 @@ L1_structure0 romp_global_structure0;
 typedef struct L1_structure1{
 float soma;
 int nada;
-float soma;
 int num_cores;
 }L1_structure1;
 L1_structure1 romp_global_structure1;
@@ -31,7 +24,6 @@ float b;
 float r;
 float soma;
 int nada;
-float soma;
 int num_cores;
 }L1_structure2;
 L1_structure2 romp_global_structure2;
@@ -188,7 +180,7 @@ soma=soma*romp_global_structure2.soma;
 
 void generic_function0(void* gen_var0){
 
-    printf("sera que vai dar certo no core: %d - L1_structure.soma: %d\n",omp_get_thread_num(),L1_structure.soma);
+    printf("sera que vai dar certo no core: %d - soma: %d\n",omp_get_thread_num(),soma);
 
 
 }
@@ -218,6 +210,8 @@ if(++x_flagsingle_x==1)
 
 
 EU_MutexUnlock(0);
+CLUSTER_SynchBarrier();
+x_flagsingle_x=0;
 
         printf("o valor de a no core %d e: %d\n",omp_get_thread_num(),romp_global_structure1.a);
 

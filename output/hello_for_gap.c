@@ -1,11 +1,5 @@
-#include "cmsis.h"
 #include "gap_common.h"
-#include "mbed_wait_api.h"
-// FEATURE_CLUSTER
 #include "gap_cluster.h"
-#include "gap_dmamchan.h"
-#include <time.h>
-#include <stdlib.h>
 #define CORE_NUMBER   (8)
 #include <stdio.h>
 
@@ -76,6 +70,8 @@ c=romp_global_structure0.c;
 
 soma=soma+romp_global_structure0.soma;
 
+    exit (0);
+
 }
 
 void generic_function0(void* gen_var0){
@@ -89,44 +85,32 @@ for(i;i<new_n; i++)
     {
 
 EU_MutexLock(0);
-{
+        {
 
             romp_global_structure0.a+=L1_structure.b+i;
-
-
-
 
 
             romp_global_structure0.c+=romp_global_structure0.a;
 
 
+            L1_structure.soma+=L1_structure.b+romp_global_structure0.c;
+
+
+        }
+
+
+EU_MutexUnlock(0);
+
         printf("o valor de i no core %d e: %d\n",omp_get_thread_num(),i);
-
-
-        L1_structure.soma+=L1_structure.b+romp_global_structure0.c;
 
 
         printf("soma = %d no core: %d\n", L1_structure.soma, omp_get_thread_num());
 
 
+        printf("o resultado da soma depois do parallel for1 e: %d\n",L1_structure.soma);
+
+
     }
-
-
-EU_MutexUnlock(0);
-
-    printf("o resultado da soma depois do parallel for1 e: %d\n",L1_structure.soma);
-
-
-
-
-
-    exit (0);
-
-
-
-
-
-}
 
 EU_MutexLock(0);
 
